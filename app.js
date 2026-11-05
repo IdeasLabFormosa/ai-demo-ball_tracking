@@ -73,7 +73,7 @@ const seeker=createFrameSeeker(video,{
 });
 async function select(v){
  const token=++loadToken;loadAbort?.abort();loadAbort=new AbortController();const {signal}=loadAbort;
- pausePlayback();seeker.reset();ready=false;heatmaps.clear();heatmapValue=null;heatmapFrame=-1;heatRequest++;heatmapErrorShown=false;roiGeometryCurrent=null;mainView.reset();roiView.reset();plot.clear();image.width=image.height=0;cc.clearRect(0,0,256,256);frame=0;renderedFrame=0;result=null;setControls(false);notice();closeColorPicker();$('loading').hidden=false;$('loading').textContent='Loading video…';selected=v;videos();document.title=`${v.name} · Trajectory`;video.setAttribute('aria-label',v.name);
+ pausePlayback();seeker.reset();ready=false;heatmaps.clear();heatmapValue=null;heatmapFrame=-1;heatRequest++;heatmapErrorShown=false;roiGeometryCurrent=null;mainView.reset();roiView.reset();plot.clear();image.width=image.height=0;cc.clearRect(0,0,256,256);frame=0;renderedFrame=0;result=null;setControls(false);notice();closeColorPicker();$('loading').hidden=false;$('loading').textContent='Loading video…';selected=v;videos();video.setAttribute('aria-label',v.name);
  const sameSource=video.getAttribute('src')===url(v.src);
  try{
   const hasResult=Boolean(history.results[v.id]);
