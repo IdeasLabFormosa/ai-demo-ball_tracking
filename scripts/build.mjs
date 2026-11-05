@@ -1,0 +1,10 @@
+import {cp,mkdir,rm,readFile,stat} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url));
+process.chdir(root);
+const manifest=JSON.parse(await readFile('data/manifest.json','utf8'));
+for(const v of manifest.videos)await stat(v.src);
+await rm('dist',{recursive:true,force:true});await mkdir('dist/data',{recursive:true});
+for(const p of ['index.html','styles.css','app.js'])await cp(p,`dist/${p}`);
+for(const p of ['manifest.json','results','web'])await cp(`data/${p}`,`dist/data/${p}`,{recursive:true});
+console.log('Static site ready in dist/');

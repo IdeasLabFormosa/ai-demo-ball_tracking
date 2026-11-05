@@ -1,0 +1,5 @@
+.DS_Store
+dist/
+node_modules/
+# Original high-bitrate clips stay local; deploy the derived H.264 copies.
+data/videos/
