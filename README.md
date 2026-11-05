@@ -65,3 +65,7 @@ Startup also builds this directory automatically. The build contains only the st
 After the terminal reports “Data ready” and “Static site ready”, the tracked generated files are ready for your usual Git commit and push. Nothing is committed or pushed automatically. If a refresh fails, fix the error before committing.
 
 See `VIDEO_REPORT.md` for automatically updated media sizes. Run `node --test tests/*.test.mjs` to check incremental preparation, replacements, deletion cleanup, asset repair, empty libraries, and deployment filtering (requires FFmpeg and ffprobe).
+
+The video navigator shows thumbnails, filenames, and tags with the original text alignment, without a search field or duration/frame-count/file-size details. Hover a card for an animated 3× thumbnail preview styled to match the original navigator, constrained to the viewport; leaving, scrolling, resizing, or selecting a video dismisses it. The label filter remains available.
+
+Preparation honors phone display-rotation metadata, matching the template decoder. Rotation is baked into playback pixels and thumbnails once; manifest dimensions use the displayed orientation so trajectories and ROI coordinates stay aligned. Existing unrotated derivatives are reused during the orientation-fix upgrade.

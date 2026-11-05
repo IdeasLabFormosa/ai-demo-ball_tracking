@@ -2,7 +2,7 @@
 
 30 videos, 2 result histories. Sizes are MiB (1,048,576 bytes).
 
-Original total: **389.80 MiB**. Optimized total: **33.57 MiB** (91.4% smaller).
+Original total: **389.80 MiB**. Optimized total: **33.48 MiB** (91.4% smaller).
 
 | Video | Original | Web MP4 | Decoded frames |
 |---|---:|---:|---:|
@@ -28,10 +28,10 @@ Original total: **389.80 MiB**. Optimized total: **33.57 MiB** (91.4% smaller).
 | 4017096184487857811366c7402-4153-408c-94b5-24046f464cb2.MOV | 5.23 | 0.94 | 440 |
 | 48dfe7c5be4377ce613023f7855ed9e3.MOV | 9.63 | 1.17 | 638 |
 | 5551390960007468971videofile.MP4 | 10.21 | 4.71 | 635 |
-| 77D8E038-11D0-4829-B145-F9A4ECADDAD4 2.MOV | 6.16 | 0.57 | 158 |
+| 77D8E038-11D0-4829-B145-F9A4ECADDAD4 2.MOV | 6.16 | 0.56 | 158 |
 | IMG_1096.MOV | 15.63 | 0.79 | 440 |
-| IMG_4346.MOV | 17.19 | 2.05 | 381 |
-| IMG_4349.MOV | 16.92 | 1.37 | 378 |
+| IMG_4346.MOV | 17.19 | 1.99 | 381 |
+| IMG_4349.MOV | 16.92 | 1.35 | 378 |
 | down-the-line.MP4 | 9.80 | 1.27 | 694 |
 | marchell_0.MP4 | 9.24 | 1.42 | 682 |
 | marchell_1.MP4 | 10.11 | 1.13 | 824 |

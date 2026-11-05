@@ -20,17 +20,36 @@ const url=p=>p.split('/').map(encodeURIComponent).join('/');
 function notice(message=''){$('notice').textContent=message;$('notice').hidden=!message;}
 async function json(p,signal){const r=await fetch(url(p),{signal});if(!r.ok)throw new Error(`Could not load ${p} (${r.status})`);return r.json();}
 function badgeFor(v){return history.tags[v.name]||'unlabeled';}
+let videoHoverPreview=null,videoFilter='all';
+function hideVideoPreview(){
+ if(!videoHoverPreview)return;
+ const preview=videoHoverPreview;videoHoverPreview=null;preview.classList.remove('is-visible');
+ setTimeout(()=>preview.remove(),180);
+}
+function showVideoPreview(thumbnail){
+ hideVideoPreview();if(thumbnail.hidden||!thumbnail.complete||!thumbnail.naturalWidth)return;
+ const rect=thumbnail.getBoundingClientRect(),size=Math.min(3,(innerWidth-16)/rect.width,(innerHeight-16)/rect.height),width=rect.width*size,height=rect.height*size;
+ const preview=document.createElement('img');preview.className='video-hover-preview';preview.src=thumbnail.src;preview.alt='';preview.setAttribute('aria-hidden','true');
+ Object.assign(preview.style,{width:`${width}px`,height:`${height}px`,left:`${Math.max(8,Math.min(innerWidth-width-8,rect.left-(width-rect.width)/2))}px`,top:`${Math.max(8,Math.min(innerHeight-height-8,rect.top-(height-rect.height)/2))}px`});
+ document.body.append(preview);videoHoverPreview=preview;
+ requestAnimationFrame(()=>{if(videoHoverPreview===preview)preview.classList.add('is-visible');});
+}
+window.addEventListener('resize',hideVideoPreview);
+window.addEventListener('blur',hideVideoPreview);
+document.addEventListener('scroll',hideVideoPreview,true);
 function videos(){
- const query=$('search').value.toLowerCase(),filter=$('filter').value;
+ hideVideoPreview();const filter=videoFilter;
  const available=manifest.videos;
- const filtered=available.filter(v=>v.name.toLowerCase().includes(query)&&(filter==='all'||badgeFor(v)===filter));
+ const filtered=available.filter(v=>filter==='all'||badgeFor(v)===filter);
  $('video-count').textContent=`${filtered.length} / ${available.length}`;
  $('videos').replaceChildren(...filtered.map(v=>{
   const b=document.createElement('button');b.className='video-item';b.setAttribute('aria-current',String(selected?.id===v.id));b.title=v.name;
   const img=document.createElement('img');img.src=url(v.thumbnail);img.alt='';img.loading='lazy';img.width=62;img.height=66;
-  const info=document.createElement('div'),name=document.createElement('strong'),meta=document.createElement('small'),tag=document.createElement('small');
-  name.textContent=v.name;meta.textContent=`${v.duration.toFixed(1)}s · ${v.frames} frames · ${(v.bytes/1048576).toFixed(1)} MB`;
-  tag.className=`tag-dot ${badgeFor(v)}`;tag.textContent=`● ${badgeFor(v)}`;info.append(name,meta,tag);b.append(img,info);b.onclick=()=>select(v);return b;
+  const info=document.createElement('div'),name=document.createElement('strong'),tag=document.createElement('small');
+  name.textContent=v.name;tag.className=`tag-dot ${badgeFor(v)}`;tag.textContent=`● ${badgeFor(v)}`;info.append(name,tag);b.append(img,info);
+  b.addEventListener('pointerenter',event=>{if(event.pointerType!=='touch')showVideoPreview(img);});
+  b.addEventListener('pointerleave',hideVideoPreview);b.addEventListener('pointercancel',hideVideoPreview);
+  b.onclick=()=>select(v);return b;
  }));
  if(!filtered.length){const p=document.createElement('p');p.className='empty-list';p.textContent='No matching videos';$('videos').append(p);}
 }
@@ -145,7 +164,27 @@ async function toggle(){
 }
 video.addEventListener('ended',pausePlayback);
 $('first').onclick=()=>seek(0);$('prev').onclick=()=>seek(frame-1);$('next').onclick=()=>seek(frame+1);$('last').onclick=()=>seek(selected.frames-1);$('play').onclick=toggle;$('impact').onclick=()=>{seek(result.impact_id);$('stage').focus({preventScroll:true});};
-$('frame').oninput=e=>seek(e.target.value);$('search').oninput=videos;$('filter').onchange=videos;
+$('frame').oninput=e=>seek(e.target.value);
+const filterOptions=[...$('filter-menu').querySelectorAll('[data-filter]')];
+function closeFilter(restoreFocus=false){$('filter-menu').hidden=true;$('filter').setAttribute('aria-expanded','false');if(restoreFocus)$('filter').focus();}
+function openFilter(){hideVideoPreview();$('filter-menu').hidden=false;$('filter').setAttribute('aria-expanded','true');filterOptions.find(option=>option.dataset.filter===videoFilter).focus();}
+$('filter').onclick=()=>{$('filter-menu').hidden?openFilter():closeFilter();};
+filterOptions.forEach(option=>option.onclick=()=>{
+ videoFilter=option.dataset.filter;
+ filterOptions.forEach(item=>item.setAttribute('aria-checked',String(item===option)));
+ const label=option.firstChild.textContent;$('filter-label').textContent=label;$('filter').setAttribute('aria-label',`Filter by tag: ${label}`);
+ closeFilter(true);videos();
+});
+$('tag-filter').addEventListener('keydown',e=>{
+ if(e.key==='Escape'){e.preventDefault();closeFilter(true);return;}
+ if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;
+ e.preventDefault();
+ if($('filter-menu').hidden){openFilter();return;}
+ const index=filterOptions.indexOf(document.activeElement),next=e.key==='Home'?0:e.key==='End'?filterOptions.length-1:(index+(e.key==='ArrowDown'?1:-1)+filterOptions.length)%filterOptions.length;
+ filterOptions[next].focus();
+});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#tag-filter'))closeFilter();});
+$('tag-filter').addEventListener('focusout',e=>{if(!e.currentTarget.contains(e.relatedTarget))closeFilter();});
 document.querySelectorAll('[data-layer]').forEach(el=>el.onclick=()=>{layers[el.dataset.layer]=!layers[el.dataset.layer];el.setAttribute('aria-pressed',String(layers[el.dataset.layer]));draw();});
 let controlsTimer;
 function showControls(){const stage=$('stage');stage.classList.add('controls-visible');clearTimeout(controlsTimer);controlsTimer=setTimeout(()=>stage.classList.remove('controls-visible'),1800);}
@@ -154,7 +193,7 @@ $('help').onclick=()=>{pausePlayback();closeColorPicker();shortcutKeys.clear();$
 new ResizeObserver(draw).observe($('stage'));
 const shortcutKeys=new Set();
 document.addEventListener('keydown',e=>{
- if(e.defaultPrevented||document.querySelector('dialog[open],.trajectory-color-picker')||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
+ if(e.target.closest('#tag-filter')||e.defaultPrevented||document.querySelector('dialog[open],.trajectory-color-picker')||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
  const editable=e.target.closest('textarea,[contenteditable=true],input:not([type=range]):not([type=checkbox])');if(editable)return;
  if(e.key==='?'&&!e.repeat){e.preventDefault();$('help').click();return;}
  if(!ready)return;

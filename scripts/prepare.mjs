@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 
 const projectRoot=fileURLToPath(new URL('../',import.meta.url));
-const ENCODER_VERSION=1;
+const ENCODER_VERSION=2;
 const ratio=s=>s.split('/').reduce((a,b)=>a/b);
 const probe=p=>JSON.parse(execFileSync('ffprobe',['-v','error','-count_frames','-select_streams','v:0','-show_streams','-show_format','-of','json',p],{encoding:'utf8'}));
 async function hash(file){const sum=createHash('sha256');for await(const chunk of createReadStream(file))sum.update(chunk);return sum.digest('hex');}
@@ -36,8 +36,11 @@ export async function prepare({root=projectRoot,rebuild=false}={}){
  for(const name of names){
   const source=at(`data/videos/${name}`),sourceHash=await hash(source),id=path.parse(name).name;
   const target=`data/web/${id}.mp4`,thumb=`data/web/${id}.jpg`,previous=cache.videos[name];
+  // Version 1 ignored display rotation. Its unrotated clips can be reused.
+  const orientation=JSON.parse(execFileSync('ffprobe',['-v','error','-select_streams','v:0','-show_entries','stream_side_data=rotation:stream_tags=rotate','-of','json',source],{encoding:'utf8'})).streams[0];
+  const rotation=((Number(orientation?.side_data_list?.find(item=>Number.isFinite(item.rotation))?.rotation??orientation?.tags?.rotate??0)%360)+360)%360;
   let record;
-  if(!rebuild&&previous?.version===ENCODER_VERSION&&previous.sourceHash===sourceHash&&await matches(at(target),previous.videoHash)){
+  if(!rebuild&&(previous?.version===ENCODER_VERSION||(previous?.version===1&&rotation===0))&&previous.sourceHash===sourceHash&&await matches(at(target),previous.videoHash)){
    record=previous.video;reused++;
   }else{
    console.log(`Preparing ${name}`);
@@ -46,10 +49,10 @@ export async function prepare({root=projectRoot,rebuild=false}={}){
    const frames=Number(s.nb_read_frames)||Number(s.nb_frames);if(!frames)throw new Error(`No decodable frames in ${name}`);
    const temporary=at(`data/web/${id}.tmp.mp4`);
    try{
-    execFileSync('ffmpeg',['-v','error','-noautorotate','-i',source,'-map','0:v:0','-an','-vf',`scale=w=960:h=960:force_original_aspect_ratio=decrease:force_divisible_by=2,setpts=N/(${fps}*TB)`,'-c:v','libx264','-preset','fast','-crf','24','-pix_fmt','yuv420p','-r',String(fps),'-fps_mode','cfr','-movflags','+faststart','-metadata:s:v:0','rotate=0','-y',temporary],{stdio:'inherit'});
+    execFileSync('ffmpeg',['-v','error','-i',source,'-map','0:v:0','-an','-vf',`scale=w=960:h=960:force_original_aspect_ratio=decrease:force_divisible_by=2,setpts=N/(${fps}*TB)`,'-c:v','libx264','-preset','fast','-crf','24','-pix_fmt','yuv420p','-r',String(fps),'-fps_mode','cfr','-movflags','+faststart','-metadata:s:v:0','rotate=0','-y',temporary],{stdio:'inherit'});
     const output=probe(temporary);if(Number(output.streams[0].nb_read_frames)!==frames)throw new Error(`Frame count changed while encoding ${name}`);
     await rename(temporary,at(target));
-    record={id,name,src:target,thumbnail:thumb,width:s.width,height:s.height,fps,frames,duration:frames/fps,originalBytes:(await stat(source)).size,bytes:(await stat(at(target))).size,codec:s.codec_name};
+    record={id,name,src:target,thumbnail:thumb,width:rotation===90||rotation===270?s.height:s.width,height:rotation===90||rotation===270?s.width:s.height,fps,frames,duration:frames/fps,originalBytes:(await stat(source)).size,bytes:(await stat(at(target))).size,codec:s.codec_name};
    }finally{await rm(temporary,{force:true});}
    encoded++;
   }

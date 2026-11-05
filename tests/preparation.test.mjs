@@ -48,3 +48,32 @@ test('newly discovered history comes first and later edits preserve its position
   m=await prepare({root});assert.deepEqual(m.histories.map(h=>h.name),['a-new','z-old']);assert.equal(m.histories[0].addedAt,addedAt);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('phone rotation is baked into playback and thumbnails and manifest uses display dimensions',async()=>{
+ const root=await mkdtemp(path.join(tmpdir(),'ball-tracking-rotation-')),at=p=>path.join(root,p);
+ const probe=p=>JSON.parse(execFileSync('ffprobe',['-v','error','-select_streams','v:0','-show_streams','-of','json',p],{encoding:'utf8'})).streams[0];
+ const pixels=p=>execFileSync('ffmpeg',['-v','error','-i',p,'-frames:v','1','-vf','scale=1:2','-f','rawvideo','-pix_fmt','rgb24','pipe:1']);
+ try{
+  await mkdir(at('data/videos'),{recursive:true});
+  execFileSync('ffmpeg',['-v','error','-f','lavfi','-i','color=c=red:s=80x40:r=10,drawbox=x=40:y=0:w=40:h=40:color=blue:t=fill','-t','0.4','-c:v','libx264','-pix_fmt','yuv420p','-y',at('base.mp4')]);
+  for(const rotation of [90,180,270]){
+   const source=at(`data/videos/phone-${rotation}.mov`);
+   execFileSync('ffmpeg',['-v','error','-display_rotation:v:0',String(rotation),'-i',at('base.mp4'),'-c','copy','-y',source]);
+  }
+  const m=await prepare({root});
+  for(const v of m.videos){
+   const turn=v.name.includes('180')?180:90;
+   assert.deepEqual([v.width,v.height],turn===180?[80,40]:[40,80]);
+   const output=probe(at(v.src)),thumb=probe(at(v.thumbnail));
+   assert.equal(output.width/output.height,v.width/v.height);assert.equal(thumb.width/thumb.height,v.width/v.height);
+   assert.ok(!(output.side_data_list||[]).some(item=>item.rotation%360),'encoded pixels must not be rotated again by the browser');
+   const expected=pixels(at(`data/videos/${v.name}`));
+   for(const asset of [v.src,v.thumbnail]){
+    const actual=pixels(at(asset));assert.equal(actual.length,expected.length);
+    for(let i=0;i<actual.length;i++)assert.ok(Math.abs(actual[i]-expected[i])<25,`${asset}: display-oriented pixel ${i}`);
+   }
+   assert.equal(v.frames,4);
+  }
+  const first=await stat(at(m.videos[0].src));await prepare({root});assert.equal((await stat(at(m.videos[0].src))).mtimeMs,first.mtimeMs);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
