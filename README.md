@@ -1,6 +1,6 @@
 # Trajectory · Ball Tracking
 
-A buildless, pure frontend explorer for the saved results in `data/`. It uses the Playground 2 layout: result history on the left, video and trajectory layers in the center, one small ROI crop, and a video navigator on the right. Layout stacks on narrow screens.
+A buildless, pure frontend explorer for the saved results in `data/`. It uses the Playground 2 layout: result history on the left, video and trajectory layers in the center, one small ROI crop, and a video navigator on the right. The desktop workspace fits the viewport; only history and video lists scroll internally. On narrow screens, the ROI sits beneath the video within the same bounded workspace.
 
 ## Run
 
@@ -8,11 +8,15 @@ A buildless, pure frontend explorer for the saved results in `data/`. It uses th
 node scripts/serve.mjs
 ```
 
-Open http://localhost:8000. Node 22 is recommended. No npm installation, inference service, or runtime API is needed. The local server supports byte-range requests for video seeking.
+Open http://localhost:8000. If that port is occupied, use `node scripts/serve.mjs --port=8123` and open http://localhost:8123. Node 22, FFmpeg, and ffprobe are required for source video preparation. No npm installation, inference service, or runtime API is needed. The local server supports byte-range requests for video seeking.
+
+Every launch automatically checks the source videos and results, creates or repairs optimized MP4s and thumbnails, updates the manifest and size report, removes obsolete generated copies, and rebuilds `dist/` before serving. Unchanged videos are reused using SHA-256 source and output checksums stored in the ignored `.cache/` folder. Replacing a video under the same filename is detected automatically. The first launch on a machine prepares every source once.
+
+While the server runs, it watches `data/videos/` and `data/results/`. Adding, replacing, or deleting a video, changing a tag, or adding/removing results automatically runs preparation and rebuilding again. The local browser reloads after a successful update. Watcher errors are printed in the terminal; fix the data and edit it again to retry. Generated files do not retrigger the watcher. On a clean clone without `data/videos/`, committed playback videos can be previewed and saved results/tags refreshed without FFmpeg; an existing but empty source folder deliberately produces an empty catalog.
 
 ## Explore
 
-Choose a result history and video. Search or filter the video list by the labels supplied in that history’s `tag.json`. Labels are read-only.
+Choose a result history and video. Newly added history folders appear first; their discovery order is saved in the generated manifest so editing tags/results does not reorder the list. The hamburger button slides the history panel closed and expands the workspace; Escape also closes it. On narrow screens the panel starts closed, and opening it temporarily hides the video rail to preserve space, matching the template. Search or filter the video list by the labels supplied in that history’s `tag.json`. Labels are read-only.
 
 Toggle raw output, fitting curve, extrapolation, and ROI. Paths reveal through the current frame, matching the template. The ROI card shows the saved model window, the ROI rectangle, and the detected point. Geometry stays in original image coordinates even though the playback copies are smaller. Frames without saved ROI geometry show an empty card. No inference button or invalid-tail layer is included.
 
@@ -24,13 +28,15 @@ All displayed footage, thumbnails, labels, and trajectories originate in `data/`
 
 Original videos in `data/videos/` are retained locally and ignored by Git. Commit `data/web/`, `data/manifest.json`, and `data/results/` with the application. This keeps the original 109 MiB clip out of Git and avoids shipping the roughly 390 MiB original collection.
 
-After changing the data, regenerate the catalog (requires FFmpeg and ffprobe):
+Normally, just add/remove clips in `data/videos/` and run `node scripts/serve.mjs`. Match result folders to the source filename without its extension: `data/results/<history>/results/<video-stem>/output.json`. Different sources must have distinct stems. Videos without a result still appear and play, with a message explaining the missing trajectory. Missing `tag.json` files default to unlabeled. Deleted source videos disappear from the catalog and deployment; original result archives are preserved locally.
+
+For preparation without starting the server:
 
 ```sh
-node scripts/prepare.mjs
+node scripts/prepare.mjs --build
 ```
 
-To regenerate existing playback copies after replacing a source:
+Changes are detected automatically. To explicitly re-encode every source with the current settings:
 
 ```sh
 node scripts/prepare.mjs --rebuild
@@ -48,6 +54,8 @@ The workflow in `.github/workflows/pages.yml` deploys pushes to `main` or `maste
 node scripts/build.mjs
 ```
 
-This produces `dist/` containing only the static UI, manifest, result files, and optimized videos. All asset URLs are relative, so a GitHub Pages repository subpath works. The build does not require FFmpeg or original videos once the generated assets are committed.
+Startup also builds this directory automatically. The build contains only the static UI, manifest, and currently referenced result files, thumbnails, and optimized videos; it excludes orphaned results and removed videos. All asset URLs are relative, so a GitHub Pages repository subpath works. The build does not require FFmpeg or original videos once the generated assets are committed.
 
-See `VIDEO_REPORT.md` for measured media sizes and verification.
+After the terminal reports “Data ready” and “Static site ready”, the tracked generated files are ready for your usual Git commit and push. Nothing is committed or pushed automatically. If a refresh fails, fix the error before committing.
+
+See `VIDEO_REPORT.md` for automatically updated media sizes. Run `node --test tests/preparation.test.mjs` to check incremental preparation, replacements, deletion cleanup, asset repair, empty libraries, and deployment filtering (requires FFmpeg and ffprobe).

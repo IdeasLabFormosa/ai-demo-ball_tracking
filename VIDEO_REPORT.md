@@ -1,6 +1,6 @@
 # Video size report
 
-30 videos, 2 result histories. All sizes below are MiB (1,048,576 bytes).
+30 videos, 2 result histories. Sizes are MiB (1,048,576 bytes).
 
 Original total: **389.80 MiB**. Optimized total: **33.57 MiB** (91.4% smaller).
 
@@ -37,8 +37,6 @@ Original total: **389.80 MiB**. Optimized total: **33.57 MiB** (91.4% smaller).
 | marchell_1.MP4 | 10.11 | 1.13 | 824 |
 | marchell_2.MP4 | 9.21 | 1.12 | 859 |
 
-Verified every optimized file has the same frame count as its decoded source and places its `moov` metadata before `mdat` for fast start. Source videos are ignored by Git; optimized copies and static results are included in deployment.
+Generated automatically by the local preparation command. Optimized videos use H.264, no audio, a 960 px maximum edge, and fast-start metadata. Decoded frame counts are verified after encoding. Source hashes detect replacements, even if filenames and sizes stay the same.
 
-The UI loads only the selected video, uses lazy JPEG thumbnails for the library, and supports metadata preload. Local HTTP byte-range seeking returned 206 Partial Content. Actual load time still depends on connection speed and hosting cache.
-
-The source container frame count was inaccurate in 12 clips; the manifest uses decoded frame counts. MP4 timestamps are normalized to the source average frame rate so an indexed result can be sought by frame. Resolution reduction and lossy encoding trade image detail for smaller downloads; original videos remain locally available.
+Only the selected video loads; other videos use lazy JPEG thumbnails. Originals stay local and are ignored by Git. Browser seeking uses normalized frame timestamps; actual loading speed depends on connection and hosting cache. Resolution reduction and lossy encoding trade image detail for smaller downloads.

@@ -9,7 +9,7 @@ async function json(p){const r=await fetch(url(p));if(!r.ok)throw new Error(`Cou
 function badgeFor(v){return history.tags[v.name]||'unlabeled';}
 function videos(){
  const query=$('search').value.toLowerCase(),filter=$('filter').value;
- const available=manifest.videos.filter(v=>history.results[v.id]);
+ const available=manifest.videos;
  const filtered=available.filter(v=>v.name.toLowerCase().includes(query)&&(filter==='all'||badgeFor(v)===filter));
  $('video-count').textContent=`${filtered.length} / ${available.length}`;
  $('videos').replaceChildren(...filtered.map(v=>{
@@ -22,21 +22,21 @@ function videos(){
  if(!filtered.length){const p=document.createElement('p');p.className='empty-list';p.textContent='No matching videos';$('videos').append(p);}
 }
 function histories(){
- $('history-count').textContent=manifest.histories.length;
  $('histories').replaceChildren(...manifest.histories.map(h=>{
   const b=document.createElement('button');b.className='history-item';b.setAttribute('aria-current',String(h===history));
   const name=document.createElement('span'),detail=document.createElement('small');name.textContent=h.name;detail.textContent=`${Object.keys(h.results).length} saved results`;b.append(name,detail);b.onclick=()=>setHistory(h);return b;
  }));
  $('history-name').textContent=history.name;
 }
-async function setHistory(h){history=h;histories();const target=manifest.videos.find(v=>v.id===selected?.id&&h.results[v.id])||manifest.videos.find(v=>h.results[v.id]);if(target)await select(target);else{result=null;notice('This history has no matching videos.');videos();}}
+async function setHistory(h){history=h;histories();const target=manifest.videos.find(v=>v.id===selected?.id)||manifest.videos.find(v=>h.results[v.id])||manifest.videos[0];if(target)await select(target);else{ready=false;result=null;selected=null;video.pause();video.removeAttribute('src');video.load();setControls(false);$('loading').hidden=true;$('video-name').textContent='No videos';$('video-meta').textContent='Add clips to data/videos to get started.';$('roi-empty').hidden=false;notice('No videos in data/videos.');videos();}}
 function setControls(enabled){for(const id of ['first','prev','play','next','last','frame','jump','speed'])$(id).disabled=!enabled;$('impact').disabled=!enabled||!Number.isInteger(result?.impact_id);}
 async function select(v){
  const token=++loadToken;video.pause();ready=false;result=null;frame=0;setControls(false);notice();$('loading').hidden=false;$('loading').textContent='Loading video…';selected=v;videos();$('video-name').textContent=v.name;$('tag').textContent=badgeFor(v);$('tag').className=`badge ${badgeFor(v)}`;
  $('video-meta').textContent=`${v.width} × ${v.height} · ${v.fps.toFixed(2)} fps · ${(v.bytes/1048576).toFixed(2)} MB`;
  const sameSource=video.getAttribute('src')===url(v.src);
  try{
-  const dataPromise=json(`${history.results[v.id]}/output.json`);
+  const hasResult=Boolean(history.results[v.id]);
+  const dataPromise=hasResult?json(`${history.results[v.id]}/output.json`):Promise.resolve({detection:[],fit:[],extrapolation:[],impact_id:null});
   const mediaPromise=new Promise((resolve,reject)=>{
    if(sameSource&&video.readyState>=2){resolve();return;}
    const loaded=()=>{cleanup();resolve();},error=()=>{cleanup();reject(new Error('Video could not be decoded. Try a browser with H.264 playback support.'));};
@@ -45,7 +45,7 @@ async function select(v){
   });
   const [data]=await Promise.all([dataPromise,mediaPromise]);if(token!==loadToken)return;
   result=data;ready=true;setControls(true);$('frame').max=$('jump').max=v.frames-1;$('impact').textContent=Number.isInteger(data.impact_id)?`Impact · ${data.impact_id}`:'No impact';
-  $('loading').hidden=true;seek(Math.max(0,Math.round((data.impact_id??0)-v.fps)));
+  $('loading').hidden=true;if(!hasResult)notice('No saved trajectory for this video in this history.');seek(Math.max(0,Math.round((data.impact_id??0)-v.fps)));
  }catch(e){if(token!==loadToken)return;$('loading').hidden=true;notice(e.message);}
 }
 function seek(n){if(!ready)return;video.pause();frame=Math.max(0,Math.min(selected.frames-1,Math.round(Number(n)||0)));video.currentTime=Math.min(video.duration-.00001,(frame+.1)/selected.fps);draw();}
@@ -89,8 +89,34 @@ document.addEventListener('keydown',e=>{
  if(e.target.matches('input,select,textarea')||$('shortcuts').open)return;
  if(e.key==='?'){$('shortcuts').showModal();return;}
  if(!ready)return;
- if(e.shiftKey&&['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const list=manifest.videos.filter(v=>history.results[v.id]),i=list.findIndex(v=>v.id===selected.id),v=list[i+(e.key==='ArrowDown'?1:-1)];if(v)select(v);return;}
+ if(e.shiftKey&&['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const list=manifest.videos,i=list.findIndex(v=>v.id===selected.id),v=list[i+(e.key==='ArrowDown'?1:-1)];if(v)select(v);return;}
  const action={' ':toggle,ArrowLeft:()=>seek(frame-1),ArrowRight:()=>seek(frame+1),Home:()=>seek(0),End:()=>seek(selected.frames-1),i:()=>Number.isInteger(result.impact_id)&&seek(result.impact_id)}[e.key];if(action){e.preventDefault();action();}
 });
+// Match the template's embedded drawer: release its workspace width on collapse.
+const sidebarMedia=matchMedia('(max-width:760px)');
+function setSidebar(open){
+ const panel=$('history-panel'),toggle=$('sidebar-toggle');
+ if(!open&&panel.contains(document.activeElement))toggle.focus();
+ panel.inert=!open;
+ panel.setAttribute('aria-hidden',String(!open));
+ panel.classList.toggle('is-collapsed',!open);
+ document.body.classList.toggle('history-collapsed',!open);
+ toggle.setAttribute('aria-expanded',String(open));
+ toggle.setAttribute('aria-label',open?'Hide history panel':'Show history panel');
+}
+$('sidebar-toggle').onclick=()=>setSidebar($('sidebar-toggle').getAttribute('aria-expanded')!=='true');
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&!event.defaultPrevented&&!document.querySelector('dialog[open]'))setSidebar(false);
+});
+sidebarMedia.addEventListener('change',event=>setSidebar(!event.matches));
+setSidebar(!sidebarMedia.matches);
+
 setControls(false);
-try{manifest=await json('data/manifest.json');if(!manifest.histories.length)throw new Error('No result histories found in data.');await setHistory(manifest.histories[0]);}catch(e){notice(e.message);$('video-name').textContent='Library unavailable';$('loading').hidden=true;}
+try{manifest=await json('data/manifest.json');if(!manifest.histories.length)manifest.histories=[{name:'Videos only',tags:{},results:{}}];await setHistory(manifest.histories[0]);}catch(e){notice(e.message);$('video-name').textContent='Library unavailable';$('loading').hidden=true;}
+
+// This development-only connection is never opened on GitHub Pages.
+if(['localhost','127.0.0.1','[::1]'].includes(location.hostname)){
+ const updates=new EventSource('./__dev/events');
+ updates.onmessage=()=>location.reload();
+ window.addEventListener('pagehide',()=>updates.close());
+}

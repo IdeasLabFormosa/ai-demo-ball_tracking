@@ -23,7 +23,7 @@
       "height": 848,
       "fps": 29.998968455365063,
       "frames": 276,
-      "duration": 9.213021,
+      "duration": 9.200316351232395,
       "originalBytes": 1925701,
       "bytes": 505698,
       "codec": "mpeg4"
@@ -37,7 +37,7 @@
       "height": 1920,
       "fps": 240.0232446103818,
       "frames": 574,
-      "duration": 2.393986,
+      "duration": 2.3914350501000294,
       "originalBytes": 18099157,
       "bytes": 632061,
       "codec": "mpeg4"
@@ -51,7 +51,7 @@
       "height": 1920,
       "fps": 23.08122322806444,
       "frames": 201,
-      "duration": 8.72901,
+      "duration": 8.70837728199796,
       "originalBytes": 26928772,
       "bytes": 1790808,
       "codec": "mpeg4"
@@ -65,7 +65,7 @@
       "height": 1920,
       "fps": 22.665640061596303,
       "frames": 238,
-      "duration": 10.517007,
+      "duration": 10.500475581241453,
       "originalBytes": 24873849,
       "bytes": 1931810,
       "codec": "mpeg4"
@@ -79,7 +79,7 @@
       "height": 1920,
       "fps": 215.30497607409754,
       "frames": 1163,
-      "duration": 5.404012,
+      "duration": 5.4016401348743175,
       "originalBytes": 114186683,
       "bytes": 2588750,
       "codec": "mpeg4"
@@ -93,7 +93,7 @@
       "height": 1280,
       "fps": 30,
       "frames": 440,
-      "duration": 14.666667,
+      "duration": 14.666666666666666,
       "originalBytes": 1700954,
       "bytes": 883042,
       "codec": "h264"
@@ -107,7 +107,7 @@
       "height": 1920,
       "fps": 28.995685218406933,
       "frames": 232,
-      "duration": 8.033002,
+      "duration": 8.001190461700922,
       "originalBytes": 15955411,
       "bytes": 398812,
       "codec": "mpeg4"
@@ -121,7 +121,7 @@
       "height": 1280,
       "fps": 30,
       "frames": 440,
-      "duration": 14.666667,
+      "duration": 14.666666666666666,
       "originalBytes": 14996521,
       "bytes": 595495,
       "codec": "h264"
@@ -135,7 +135,7 @@
       "height": 1920,
       "fps": 29.995874247050086,
       "frames": 63,
-      "duration": 2.102995,
+      "duration": 2.1002888424295776,
       "originalBytes": 5306531,
       "bytes": 233436,
       "codec": "mpeg4"
@@ -149,7 +149,7 @@
       "height": 1920,
       "fps": 29.964487361545014,
       "frames": 77,
-      "duration": 2.574017,
+      "duration": 2.569708571047276,
       "originalBytes": 16236465,
       "bytes": 731344,
       "codec": "mpeg4"
@@ -163,7 +163,7 @@
       "height": 1204,
       "fps": 40.7421271251932,
       "frames": 196,
-      "duration": 4.820982,
+      "duration": 4.81074538395424,
       "originalBytes": 2701054,
       "bytes": 369162,
       "codec": "mpeg4"
@@ -177,7 +177,7 @@
       "height": 1042,
       "fps": 40.18896797352943,
       "frames": 174,
-      "duration": 4.335996,
+      "duration": 4.329546359951457,
       "originalBytes": 4739661,
       "bytes": 747023,
       "codec": "mpeg4"
@@ -205,7 +205,7 @@
       "height": 1018,
       "fps": 41.06616920063427,
       "frames": 125,
-      "duration": 3.06702,
+      "duration": 3.043868041094745,
       "originalBytes": 2337454,
       "bytes": 421457,
       "codec": "mpeg4"
@@ -219,7 +219,7 @@
       "height": 1056,
       "fps": 41.03809041458104,
       "frames": 144,
-      "duration": 3.509002,
+      "duration": 3.50893520008514,
       "originalBytes": 3777446,
       "bytes": 704697,
       "codec": "mpeg4"
@@ -233,7 +233,7 @@
       "height": 1280,
       "fps": 30,
       "frames": 295,
-      "duration": 9.833333,
+      "duration": 9.833333333333334,
       "originalBytes": 4331843,
       "bytes": 789583,
       "codec": "h264"
@@ -261,7 +261,7 @@
       "height": 1280,
       "fps": 30,
       "frames": 370,
-      "duration": 12.333333,
+      "duration": 12.333333333333334,
       "originalBytes": 5152797,
       "bytes": 1009377,
       "codec": "h264"
@@ -275,7 +275,7 @@
       "height": 1280,
       "fps": 30,
       "frames": 440,
-      "duration": 14.666667,
+      "duration": 14.666666666666666,
       "originalBytes": 5479056,
       "bytes": 985007,
       "codec": "h264"
@@ -317,7 +317,7 @@
       "height": 720,
       "fps": 30,
       "frames": 158,
-      "duration": 5.266667,
+      "duration": 5.266666666666667,
       "originalBytes": 6461513,
       "bytes": 595562,
       "codec": "h264"
@@ -331,7 +331,7 @@
       "height": 1280,
       "fps": 30,
       "frames": 440,
-      "duration": 14.666667,
+      "duration": 14.666666666666666,
       "originalBytes": 16389220,
       "bytes": 831069,
       "codec": "h264"
@@ -373,7 +373,7 @@
       "height": 720,
       "fps": 23.93103448275862,
       "frames": 694,
-      "duration": 28.966667,
+      "duration": 29.000000000000004,
       "originalBytes": 10276340,
       "bytes": 1335846,
       "codec": "h264"
@@ -387,7 +387,7 @@
       "height": 720,
       "fps": 23.92982456140351,
       "frames": 682,
-      "duration": 28.5,
+      "duration": 28.499999999999996,
       "originalBytes": 9693691,
       "bytes": 1486507,
       "codec": "h264"
@@ -415,7 +415,7 @@
       "height": 720,
       "fps": 29.96511627906977,
       "frames": 859,
-      "duration": 28.666667,
+      "duration": 28.666666666666664,
       "originalBytes": 9657808,
       "bytes": 1174402,
       "codec": "h264"
@@ -424,6 +424,7 @@
   "histories": [
     {
       "name": "v1-2026-11-05",
+      "addedAt": 1793441293811.5554,
       "tags": {
         "marchell_2.MP4": "problematic",
         "marchell_1.MP4": "problematic",
@@ -491,6 +492,7 @@
     },
     {
       "name": "baseline",
+      "addedAt": 1793441293811.5554,
       "tags": {
         "marchell_2.MP4": "problematic",
         "marchell_1.MP4": "problematic",
