@@ -32,7 +32,7 @@ function showVideoPreview(thumbnail){
  const preview=document.createElement('img');preview.className='video-hover-preview';preview.src=thumbnail.src;preview.alt='';preview.setAttribute('aria-hidden','true');
  Object.assign(preview.style,{width:`${width}px`,height:`${height}px`,left:`${Math.max(8,Math.min(innerWidth-width-8,rect.left-(width-rect.width)/2))}px`,top:`${Math.max(8,Math.min(innerHeight-height-8,rect.top-(height-rect.height)/2))}px`});
  document.body.append(preview);videoHoverPreview=preview;
- requestAnimationFrame(()=>{if(videoHoverPreview===preview)preview.classList.add('is-visible');});
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{if(videoHoverPreview===preview)preview.classList.add('is-visible');}));
 }
 window.addEventListener('resize',hideVideoPreview);
 window.addEventListener('blur',hideVideoPreview);
