@@ -34,11 +34,11 @@ h1{font-size:22px;line-height:1.25;margin-top:5px;white-space:nowrap;overflow:hi
 .video-panel>header{flex:none;padding:18px 14px 14px}.video-panel h2{font-size:13px}
 .search{margin-top:16px}.search input{font-size:13px}.video-panel select{font-size:12px}
 #videos{min-height:0;overscroll-behavior:contain;padding:8px}
-.video-item{gap:8px;padding:8px}.video-item img{width:86px;height:66px;object-fit:contain}
+.video-item{gap:10px;padding:8px}
 .video-item strong{font-size:12px;line-height:1.5}.video-item small{font-size:11px;line-height:1.6}
 #notice{position:fixed;right:18px;bottom:18px;z-index:10;max-width:min(440px,80vw);font-size:12px;margin:0}
-@media(max-width:1250px) and (min-width:761px){body{grid-template-columns:200px minmax(0,1fr) 230px}.history-panel{padding:24px 14px}.video-item img{width:66px;height:58px}.workspace-footer>span:last-child{display:none}}
-@media(max-width:1000px) and (min-width:761px){body{grid-template-columns:180px minmax(0,1fr) 190px}.brand{font-size:14px;gap:6px}.brand>span{font-size:24px}.video-item{flex-direction:column;align-items:stretch}.video-item img{width:100%;height:66px}.inspection-layout{--roi-size:clamp(140px,22vh,180px);gap:8px}h1{font-size:18px}.history-info{display:none}.legend{left:8px;top:8px;padding:8px}.legend label{font-size:12px}.transport{gap:6px}.transport .speed-label{display:none}}
+@media(max-width:1250px) and (min-width:761px){body{grid-template-columns:200px minmax(0,1fr) 230px}.history-panel{padding:24px 14px}.workspace-footer>span:last-child{display:none}}
+@media(max-width:1000px) and (min-width:761px){body{grid-template-columns:180px minmax(0,1fr) 190px}.brand{font-size:14px;gap:6px}.brand>span{font-size:24px}.inspection-layout{--roi-size:clamp(140px,22vh,180px);gap:8px}h1{font-size:18px}.history-info{display:none}.legend{left:8px;top:8px;padding:8px}.legend label{font-size:12px}.transport{gap:6px}.transport .speed-label{display:none}}
 @media(max-height:600px) and (min-width:761px){.history-panel{padding-top:18px;gap:14px}.section-label{margin-top:8px}.history-info,.workspace-footer,.inspection-hint{display:none}.legend label{min-height:24px}.timeline{padding:8px 12px}.transport{margin-top:8px}}
 /* Phones/tablets keep a bounded workspace, with the ROI beneath the video. */
 @media(max-width:760px){
@@ -193,3 +193,6 @@ main{overflow:visible}
 #filter-menu button[aria-checked=true]>span{visibility:visible}
 #filter-menu button:hover,#filter-menu button:focus-visible{background:#1c2c43;border-color:var(--blue);outline:none}
 @media(max-width:760px){#filter,#filter-menu button{font-size:11px}}
+
+/* Match template thumbnails: filled crops, with stacked cards on narrow screens. */
+@media(max-width:900px){.video-item{flex-direction:column;align-items:stretch}.video-item img{width:100%;height:66px}.video-item>div{min-height:48px}}
