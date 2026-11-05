@@ -20,7 +20,7 @@ export async function decodeHeatmap(entry){
 }
 export function heatmapRGBA(values){
  const pixels=new Uint8ClampedArray(values.length*4),channel=v=>Math.round(255*Math.max(0,Math.min(1,v)));
- for(let i=0;i<values.length;i++){const t=values[i]/255;pixels[i*4]=channel(1.5-Math.abs(4*t-3));pixels[i*4+1]=channel(1.5-Math.abs(4*t-2));pixels[i*4+2]=channel(1.5-Math.abs(4*t-1));pixels[i*4+3]=t>=.05?89:0;}
+ for(let i=0;i<values.length;i++){const t=values[i]/255;pixels[i*4]=channel(1.5-Math.abs(4*t-3));pixels[i*4+1]=channel(1.5-Math.abs(4*t-2));pixels[i*4+2]=channel(1.5-Math.abs(4*t-1));pixels[i*4+3]=t>=.05?178:0;}
  return pixels;
 }
 export function createHeatmaps(){

@@ -57,7 +57,7 @@ export function createPlot(svg,{tooltip,onSeek}){
   if(layers.roi&&row?.roi?.length===4){
    const [x,y,w,h]=row.roi;
    state.details.append(interactive(node('rect',{x:x-w/2,y:y-h/2,width:w,height:h,stroke:colors.roi,'stroke-width':2/scale,opacity:'.85',fill:'none'}),'roi','Actual ROI'));
-   for(const item of roiPoints(row))state.details.append(interactive(node('circle',{cx:item.xy[0],cy:item.xy[1],r:item.radius/scale,stroke:detailColors[item.key],'stroke-width':2.5/scale,opacity:'.85',fill:'none'}),item.key,`${item.name}: (${item.xy.map(n=>n.toFixed(1)).join(', ')})`));
+   for(const item of roiPoints(row))state.details.append(interactive(node('circle',{cx:item.xy[0],cy:item.xy[1],r:item.radius/scale,stroke:detailColors[item.key],'stroke-width':2/scale,opacity:'.85',fill:'none'}),item.key,`${item.name}: (${item.xy.map(n=>n.toFixed(1)).join(', ')})`));
   }
  }
  svg.addEventListener('click',e=>{if(e.target===svg&&selection!==null){selection=null;if(last)render(last);}});

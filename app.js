@@ -1,6 +1,6 @@
 import {createPanZoom} from './viewer/pan-zoom.mjs';
 import {createHeatmaps} from './viewer/heatmaps.mjs';
-import {paintROI,drawROIPoints,roiPoints,detailColors} from './viewer/roi.mjs';
+import {paintROI,drawROIPoints} from './viewer/roi.mjs';
 import {createFrameSeeker,frameAtTime} from './viewer/frame-seeker.mjs';
 import {createPlot} from './viewer/plot.mjs';
 import {playbackCommand} from './viewer/keyboard.mjs';
@@ -12,9 +12,10 @@ let times=[],renderedFrame=0,loadAbort=null,playing=false,playVersion=0,playCall
 let manifest,history,selected,result=null,frame=0,loadToken=0,ready=false;
 const layers={raw:true,fit:true,extra:true,roi:false};
 const heatmaps=createHeatmaps();
+let heatmapVisible=true;
 let roiGeometryCurrent=null,heatmapValue=null,heatmapFrame=-1,heatRequest=0,heatmapErrorShown=false;
 const mainView=createPanZoom($('stage'),{targets:()=>[image,$('overlay')],dimensions:()=>({width:selected?.width||1,height:selected?.height||1}),onChange:()=>drawMainPlot(),onDoubleClick:()=>mainView.reset()});
-const roiView=createPanZoom($('roi-stage'),{targets:()=>[crop,$('roi-vectors')],dimensions:()=>({width:roiGeometryCurrent?.cw||1,height:roiGeometryCurrent?.ch||1}),onChange:()=>drawROIDetails(),onDoubleClick:()=>toggleROISize(),ignore:'button',ignorePlot:false});
+const roiView=createPanZoom($('roi-stage'),{targets:()=>[crop,$('roi-vectors')],dimensions:()=>({width:roiGeometryCurrent?.cw||1,height:roiGeometryCurrent?.ch||1}),onChange:()=>drawROIDetails(),onDoubleClick:()=>toggleROISize(),ignore:'button',ignorePlot:false,anchor:()=>roiGeometryCurrent?{x:roiGeometryCurrent.x-roiGeometryCurrent.left,y:roiGeometryCurrent.y-roiGeometryCurrent.top,fitWidth:roiGeometryCurrent.rw/.9,fitHeight:roiGeometryCurrent.rh/.9}:null});
 const url=p=>p.split('/').map(encodeURIComponent).join('/');
 function notice(message=''){$('notice').textContent=message;$('notice').hidden=!message;}
 async function json(p,signal){const r=await fetch(url(p),{signal});if(!r.ok)throw new Error(`Could not load ${p} (${r.status})`);return r.json();}
@@ -89,20 +90,15 @@ function drawROIDetails(){
 function paintROICurrent(){
  if(!ready)return;
  const row=result.detection[renderedFrame];
- roiGeometryCurrent=paintROI(crop,image,row,selected.width,selected.height,heatmapFrame===renderedFrame?heatmapValue:null);
+ roiGeometryCurrent=paintROI(crop,image,row,selected.width,selected.height,heatmapVisible&&heatmapFrame===renderedFrame?heatmapValue:null);
  $('roi-empty').hidden=Boolean(roiGeometryCurrent);$('roi-vectors').hidden=!roiGeometryCurrent;
- const footer=$('roi-coordinates');footer.replaceChildren();
- if(roiGeometryCurrent){
-  $('roi-size').textContent=`${Math.round(roiGeometryCurrent.rw)} × ${Math.round(roiGeometryCurrent.rh)}`;
-  for(const item of roiPoints(row)){const line=document.createElement('div'),label=document.createElement('span'),value=document.createElement('strong');line.className='point-coordinate';label.textContent=item.name;label.style.color=detailColors[item.key];value.textContent=item.xy.map(n=>n.toFixed(1)).join(', ');line.append(label,value);footer.append(line);}
-  roiView.apply();
- }else{$('roi-size').textContent='—';$('roi-vectors').replaceChildren();}
+ if(roiGeometryCurrent)roiView.apply();else $('roi-vectors').replaceChildren();
  crop.dataset.frame=String(renderedFrame);$('roi-card').dataset.renderedFrame=String(renderedFrame);
 }
 function draw(){
  if(!ready||!image.width)return;
  mainView.apply();paintROICurrent();
- if(heatmapFrame!==renderedFrame&&roiGeometryCurrent){
+ if(heatmapVisible&&heatmapFrame!==renderedFrame&&roiGeometryCurrent){
   const target=renderedFrame,token=loadToken,request=++heatRequest;
   heatmaps.frame(target).then(value=>{
    if(request!==heatRequest||token!==loadToken||target!==renderedFrame)return;
@@ -110,6 +106,12 @@ function draw(){
   }).catch(()=>{if(token===loadToken&&!heatmapErrorShown){heatmapErrorShown=true;notice('The heatmap is unavailable for this video.');}});
  }
 }
+$('heatmap-toggle').addEventListener('click',event=>{
+ event.stopPropagation();heatmapVisible=!heatmapVisible;
+ $('heatmap-toggle').setAttribute('aria-pressed',String(heatmapVisible));
+ $('heatmap-toggle').title=heatmapVisible?'Hide heatmap':'Show heatmap';draw();
+});
+$('heatmap-toggle').addEventListener('keydown',event=>event.stopPropagation());
 const roiCard=$('roi-card');let roiClickTimer=null;
 function selectROI(selected){layers.roi=selected;roiCard.classList.toggle('is-selected',selected);roiCard.setAttribute('aria-pressed',String(selected));if(!selected)roiCard.classList.remove('is-enlarged');drawMainPlot();}
 function toggleROISize(){clearTimeout(roiClickTimer);const enlarge=!roiCard.classList.contains('is-enlarged');selectROI(true);roiCard.classList.toggle('is-enlarged',enlarge);roiView.apply();}

@@ -1,19 +1,31 @@
-export function constrainedView({zoom=1,x=0,y=0},width,height,viewportWidth,viewportHeight){
- const fit=Math.min(viewportWidth/width,viewportHeight/height),z=Math.max(1,Math.min(32,zoom));
- const limitX=Math.max(0,(width*fit*z-viewportWidth)/2),limitY=Math.max(0,(height*fit*z-viewportHeight)/2);
- return {zoom:z,x:Math.max(-limitX,Math.min(limitX,x)),y:Math.max(-limitY,Math.min(limitY,y)),fit};
+export function constrainedView({zoom=1,x=0,y=0},width,height,viewportWidth,viewportHeight,{padding=0,anchorX=width/2,anchorY=height/2,fitWidth=2*Math.max(anchorX,width-anchorX),fitHeight=2*Math.max(anchorY,height-anchorY)}={}){
+ const availableWidth=Math.max(1,viewportWidth-2*padding),availableHeight=Math.max(1,viewportHeight-2*padding);
+ // Fit all context around the ROI center, including asymmetric frame-edge crops.
+ const fit=Math.min(availableWidth/fitWidth,availableHeight/fitHeight),z=Math.max(1,Math.min(32,zoom));
+ function axis(size,available,anchor,pan){
+  const ideal=(size/2-anchor)*fit*z,extent=size*fit*z;
+  if(extent<=available){const spare=(available-extent)/2;return {base:Math.max(-spare,Math.min(spare,ideal)),pan:0};}
+  const limit=(extent-available)/2;return {base:ideal,pan:Math.max(-limit,Math.min(limit,ideal+pan))-ideal};
+ }
+ const horizontal=axis(width,availableWidth,anchorX,x),vertical=axis(height,availableHeight,anchorY,y);
+ return {zoom:z,x:horizontal.pan,y:vertical.pan,baseX:horizontal.base,baseY:vertical.base,fit};
 }
-export function createPanZoom(stage,{targets,dimensions,onChange=()=>{},onDoubleClick=()=>{},ignore='.legend,.video-controls',ignorePlot=true}){
+export function createPanZoom(stage,{targets,dimensions,onChange=()=>{},onDoubleClick=()=>{},ignore='.legend,.video-controls',ignorePlot=true,padding=0,anchor=()=>null}){
+ const options=()=>{const point=anchor();return {padding,...(point?{anchorX:point.x,anchorY:point.y,...(point.fitWidth?{fitWidth:point.fitWidth,fitHeight:point.fitHeight}:{})}:{})};};
  let view={zoom:1,x:0,y:0},pointers=new Map(),pinch=null,dragged=false,suppressClick=false;
  function apply(){
   const {width,height}=dimensions();if(!(width>0&&height>0&&stage.clientWidth>0&&stage.clientHeight>0))return;
-  view=constrainedView(view,width,height,stage.clientWidth,stage.clientHeight);
-  for(const el of targets()){el.style.width=`${width*view.fit}px`;el.style.height=`${height*view.fit}px`;el.style.transform=`translate(-50%,-50%) translate(${view.x}px,${view.y}px) scale(${view.zoom})`;}
+  view=constrainedView(view,width,height,stage.clientWidth,stage.clientHeight,options());
+  for(const el of targets()){el.style.width=`${width*view.fit}px`;el.style.height=`${height*view.fit}px`;el.style.transform=`translate(-50%,-50%) translate(${view.baseX+view.x}px,${view.baseY+view.y}px) scale(${view.zoom})`;}
   stage.classList.toggle('is-zoomed',view.zoom>1);stage.dataset.zoom=String(view.zoom);stage.dataset.panX=String(view.x);stage.dataset.panY=String(view.y);
   onChange(view.fit*view.zoom*(stage.getBoundingClientRect().width/stage.clientWidth));
  }
  function reset(){view={zoom:1,x:0,y:0};apply();}
- function zoomAt(zoom,cx,cy){const r=stage.getBoundingClientRect(),outer=r.width/stage.clientWidth,x=((cx??r.left+r.width/2)-r.left-r.width/2)/outer,y=((cy??r.top+r.height/2)-r.top-r.height/2)/outer,next=Math.max(1,Math.min(32,zoom)),ratio=next/view.zoom;view.x=x-(x-view.x)*ratio;view.y=y-(y-view.y)*ratio;view.zoom=next;apply();}
+ function zoomAt(zoom,cx,cy){
+  const r=stage.getBoundingClientRect(),outer=r.width/stage.clientWidth,x=((cx??r.left+r.width/2)-r.left-r.width/2)/outer,y=((cy??r.top+r.height/2)-r.top-r.height/2)/outer,next=Math.max(1,Math.min(32,zoom)),ratio=next/view.zoom,d=dimensions();
+  const nextView=constrainedView({...view,zoom:next},d.width,d.height,stage.clientWidth,stage.clientHeight,options());
+  view.x=x-(x-((view.baseX||0)+view.x))*ratio-nextView.baseX;view.y=y-(y-((view.baseY||0)+view.y))*ratio-nextView.baseY;view.zoom=next;apply();
+ }
  function blocked(event){return ignore&&event.target.closest(ignore);}
  stage.addEventListener('wheel',e=>{if(blocked(e))return;e.preventDefault();stage.focus({preventScroll:true});zoomAt(view.zoom*Math.exp(-e.deltaY*.002),e.clientX,e.clientY);},{passive:false});
  stage.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||!['+','=','-','0'].includes(e.key)||blocked(e))return;e.preventDefault();e.stopPropagation();if(e.key==='0')reset();else zoomAt(view.zoom*(e.key==='-'?.8:1.25));});
@@ -35,5 +47,5 @@ export function createPanZoom(stage,{targets,dimensions,onChange=()=>{},onDouble
  stage.addEventListener('click',e=>{if(suppressClick){suppressClick=false;e.preventDefault();e.stopImmediatePropagation();}},{capture:true});
  stage.addEventListener('dblclick',e=>{if(blocked(e)||(ignorePlot&&e.target.closest('.plot-object')))return;e.preventDefault();e.stopPropagation();onDoubleClick();});
  new ResizeObserver(apply).observe(stage);
- return {apply,reset,zoomAt,get scale(){const d=dimensions();return Math.min(stage.clientWidth/d.width,stage.clientHeight/d.height)*view.zoom*(stage.getBoundingClientRect().width/stage.clientWidth);},get view(){return {...view};}};
+ return {apply,reset,zoomAt,get scale(){return (view.fit||1)*view.zoom*(stage.getBoundingClientRect().width/stage.clientWidth);},get view(){return {...view};}};
 }

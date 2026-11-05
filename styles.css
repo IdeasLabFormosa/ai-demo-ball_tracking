@@ -157,3 +157,20 @@ main{overflow:visible}
 @media(max-width:760px){.roi-column{width:min(100%,180px);height:100%;align-self:start}.roi-card{height:100%;width:100%;grid-template-rows:20px minmax(0,1fr) auto;transform-origin:center top}.roi-card header{height:20px;padding:2px 5px}.point-coordinate{line-height:10px}.point-coordinate span{font-size:7px}.point-coordinate strong{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.roi-card,#roi-vectors .plot-object{transition:none}}
 #roi-stage:focus{outline:none}
+
+/* Show ROI context without coordinate rows. */
+@media(min-width:761px){.inspection-layout{--roi-size:clamp(200px,calc((100dvh - 32px)/3),280px)}}
+.roi-card{grid-template-rows:24px minmax(0,1fr)}
+.roi-stage{background:#080e19}
+@media(max-width:760px){.roi-column{width:min(100%,220px)}.roi-card{grid-template-rows:20px minmax(0,1fr)}}
+
+/* Keep the drawable viewport below the header, without intrinsic aspect sizing. */
+.roi-stage{height:auto;align-self:stretch;min-height:0}
+
+#heatmap-toggle{display:flex;align-items:center;gap:5px;margin-left:auto;padding:2px 5px;min-height:20px;border:1px solid transparent;border-radius:5px;background:transparent;color:#b9d9d1;font-size:10px;line-height:1;font-weight:500}
+#heatmap-toggle:hover{background:#ffffff14;border-color:#ffffff25}
+#heatmap-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#heatmap-toggle .eye-slash{display:none}
+#heatmap-toggle[aria-pressed=false]{color:#8997ac}
+#heatmap-toggle[aria-pressed=false] .eye-slash{display:block}
+@media(max-width:760px){#heatmap-toggle{font-size:9px;min-height:16px;padding:1px 3px}#heatmap-toggle svg{width:12px;height:12px}}
