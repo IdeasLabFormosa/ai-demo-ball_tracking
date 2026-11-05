@@ -132,3 +132,28 @@ body>main{grid-column:2;grid-row:1}
 @media(hover:hover){#stage:hover>.video-controls{opacity:1;transform:translateY(0);pointer-events:auto}}
 @media(max-width:760px){#stage>.legend{top:8px;right:8px;left:auto;padding:8px}.legend-toggle{font-size:12px;min-height:28px}#stage>.video-controls{padding:22px 8px 7px}}
 @media(prefers-reduced-motion:reduce){#overlay .plot-object,#overlay [data-trajectory],#stage>.video-controls,.legend-toggle{transition:none}}
+
+/* Image and vectors share the same constrained viewport transform. */
+#stage,#roi-stage{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#stage.is-dragging,#roi-stage.is-dragging{cursor:grabbing}
+#stage #frame-image,#stage #overlay,#roi-stage #crop,#roi-stage #roi-vectors{position:absolute;left:50%;top:50%;right:auto;bottom:auto;inset:auto;left:50%;top:50%;max-width:none;max-height:none;transform-origin:center;object-fit:fill}
+#overlay{pointer-events:none}
+#roi-vectors{display:block;pointer-events:none;overflow:hidden}
+#roi-vectors .plot-object{pointer-events:visibleStroke;cursor:crosshair;transition:stroke .18s ease-out,filter .12s ease-out}
+.roi-column{overflow:visible;position:relative;z-index:5}
+main{overflow:visible}
+.roi-card{position:relative;z-index:0;width:100%;height:var(--roi-size);aspect-ratio:1;display:grid;grid-template-rows:24px minmax(0,1fr) auto;border:3px solid color-mix(in srgb,#34d399 25%,#263146);border-radius:16px;transform-origin:center top;transition:transform .18s ease-out,z-index .18s step-end;cursor:pointer;user-select:none}
+.roi-card.is-selected{border-color:#34d399;box-shadow:none}
+.roi-card.is-enlarged{transform:scale(1.8);z-index:20;transition:transform .18s ease-out,z-index 0s}
+.roi-card:focus-visible{outline:2px solid #70a5ff;outline-offset:2px}
+.roi-card header{position:static;min-height:0;height:24px;padding:3px 7px;background:#111a29;font-size:9px}
+.roi-card header h2{font-size:11px}
+.roi-stage{position:relative;min-height:0;aspect-ratio:auto;height:100%;width:100%;overflow:hidden;background:#000}
+#roi-empty{pointer-events:none;font-size:10px}
+.roi-card footer{display:grid;gap:1px;padding:3px 6px;min-height:20px;background:#111a29;border:0}
+.point-coordinate{display:flex;align-items:center;justify-content:space-between;gap:3px;line-height:12px}
+.point-coordinate span{font-size:8px;letter-spacing:0;text-transform:capitalize}.point-coordinate strong{font-size:9px;font-weight:500;font-variant-numeric:tabular-nums}
+@media(min-width:761px){.inspection-layout{--roi-size:calc((100dvh - 46px)/4)}}
+@media(max-width:760px){.roi-column{width:min(100%,180px);height:100%;align-self:start}.roi-card{height:100%;width:100%;grid-template-rows:20px minmax(0,1fr) auto;transform-origin:center top}.roi-card header{height:20px;padding:2px 5px}.point-coordinate{line-height:10px}.point-coordinate span{font-size:7px}.point-coordinate strong{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.roi-card,#roi-vectors .plot-object{transition:none}}
+#roi-stage:focus{outline:none}

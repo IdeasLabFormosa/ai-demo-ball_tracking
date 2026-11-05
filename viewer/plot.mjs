@@ -1,6 +1,7 @@
+import {roiPoints,detailColors} from './roi.mjs';
 const NS='http://www.w3.org/2000/svg';
-export const valid=p=>Array.isArray(p)&&p.length>=2&&p.slice(0,2).every(Number.isFinite);
-export const brighter=color=>'#'+color.slice(1).match(/../g).map(c=>Math.round(parseInt(c,16)*.5+127.5).toString(16).padStart(2,'0')).join('');
+import {valid,brighter} from './geometry.mjs';
+export {valid,brighter} from './geometry.mjs';
 const node=(tag,attrs={})=>{const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,v);return el;};
 export function createPlot(svg,{tooltip,onSeek}){
  let selection=null,last=null,state=null,hover=null;
@@ -8,12 +9,13 @@ export function createPlot(svg,{tooltip,onSeek}){
  function resetHover(){
   if(!state)return;
   for(const [key,group]of state.groups){group.el.setAttribute('opacity','.4');for(const el of group.el.querySelectorAll('[data-series]')){el.style.stroke='';el.style.fill='';}}
+  for(const el of state.details.querySelectorAll('[data-series]'))el.style.stroke='';
   hover?.remove();hover=null;tooltip.hidden=true;
  }
  function interactive(el,key,label,point=null,index=null){
   el.classList.add('plot-object');el.dataset.series=key;el.setAttribute('aria-label',label);
   el.addEventListener('pointerenter',()=>{
-   resetHover();const color=last.colors[key];
+   resetHover();const color=last.colors[key]||detailColors[key];el.style.stroke=brighter(color);
    for(const [other,group]of state.groups)if(last.colors[other]===color){group.el.setAttribute('opacity','.75');for(const item of group.el.querySelectorAll('[data-series]')){item.style.stroke=brighter(color);if(item.tagName==='circle')item.style.fill=brighter(color);}}
    if(point){hover=ring(point[0],point[1],color);state.focus.append(hover);}
   });
@@ -24,7 +26,7 @@ export function createPlot(svg,{tooltip,onSeek}){
  }
  function render(options){
   const {result,frame,width,height,layers,colors,scale}=options;
-  const signature=JSON.stringify([width,height,layers,colors,scale]);
+  const signature=JSON.stringify([width,height,layers,colors]);
   const rebuild=!state||last?.result!==result||state.signature!==signature;
   last=options;
   if(rebuild){
@@ -48,11 +50,15 @@ export function createPlot(svg,{tooltip,onSeek}){
     if(current)state.focus.append(node('circle',{cx:p[0],cy:p[1],r:11/scale,fill:'none',stroke:color,'stroke-width':3/scale}));
     if(index===selection&&key!=='extra')state.focus.append(ring(p[0],p[1],color));
    }
-   group.path.setAttribute('d',d);
+   group.path.setAttribute('d',d);group.path.setAttribute('stroke-width',5/scale);
    for(const [index,dot]of group.dots)if(!visible.has(index)){dot.remove();group.dots.delete(index);}
   }
   state.details.replaceChildren();const row=result.detection[frame];
-  if(layers.roi&&row?.roi?.length===4){const [x,y,w,h]=row.roi;state.details.append(interactive(node('rect',{x:x-w/2,y:y-h/2,width:w,height:h,stroke:colors.roi,'stroke-width':2/scale,opacity:'.85',fill:'none'}),'roi','Region of interest'));}
+  if(layers.roi&&row?.roi?.length===4){
+   const [x,y,w,h]=row.roi;
+   state.details.append(interactive(node('rect',{x:x-w/2,y:y-h/2,width:w,height:h,stroke:colors.roi,'stroke-width':2/scale,opacity:'.85',fill:'none'}),'roi','Actual ROI'));
+   for(const item of roiPoints(row))state.details.append(interactive(node('circle',{cx:item.xy[0],cy:item.xy[1],r:item.radius/scale,stroke:detailColors[item.key],'stroke-width':2.5/scale,opacity:'.85',fill:'none'}),item.key,`${item.name}: (${item.xy.map(n=>n.toFixed(1)).join(', ')})`));
+  }
  }
  svg.addEventListener('click',e=>{if(e.target===svg&&selection!==null){selection=null;if(last)render(last);}});
  return {render,clear(){last=null;selection=null;state=null;tooltip.hidden=true;svg.replaceChildren();}};

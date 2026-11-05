@@ -1,5 +1,8 @@
+import {createPanZoom} from './viewer/pan-zoom.mjs';
+import {createHeatmaps} from './viewer/heatmaps.mjs';
+import {paintROI,drawROIPoints,roiPoints,detailColors} from './viewer/roi.mjs';
 import {createFrameSeeker,frameAtTime} from './viewer/frame-seeker.mjs';
-import {createPlot,valid} from './viewer/plot.mjs';
+import {createPlot} from './viewer/plot.mjs';
 import {playbackCommand} from './viewer/keyboard.mjs';
 const $=id=>document.getElementById(id);
 const video=$('video'),image=$('frame-image'),crop=$('crop'),cc=crop.getContext('2d');
@@ -7,7 +10,11 @@ const plot=createPlot($('overlay'),{tooltip:$('plot-tooltip'),onSeek:n=>seek(n)}
 const colors={raw:'#f16c68',fit:'#b58aff',extra:'#ffe16b',roi:'#34d399'};
 let times=[],renderedFrame=0,loadAbort=null,playing=false,playVersion=0,playCallback=null,playAnimation=null;
 let manifest,history,selected,result=null,frame=0,loadToken=0,ready=false;
-const layers={raw:true,fit:true,extra:true,roi:true};
+const layers={raw:true,fit:true,extra:true,roi:false};
+const heatmaps=createHeatmaps();
+let roiGeometryCurrent=null,heatmapValue=null,heatmapFrame=-1,heatRequest=0,heatmapErrorShown=false;
+const mainView=createPanZoom($('stage'),{targets:()=>[image,$('overlay')],dimensions:()=>({width:selected?.width||1,height:selected?.height||1}),onChange:()=>drawMainPlot(),onDoubleClick:()=>mainView.reset()});
+const roiView=createPanZoom($('roi-stage'),{targets:()=>[crop,$('roi-vectors')],dimensions:()=>({width:roiGeometryCurrent?.cw||1,height:roiGeometryCurrent?.ch||1}),onChange:()=>drawROIDetails(),onDoubleClick:()=>toggleROISize(),ignore:'button',ignorePlot:false});
 const url=p=>p.split('/').map(encodeURIComponent).join('/');
 function notice(message=''){$('notice').textContent=message;$('notice').hidden=!message;}
 async function json(p,signal){const r=await fetch(url(p),{signal});if(!r.ok)throw new Error(`Could not load ${p} (${r.status})`);return r.json();}
@@ -46,7 +53,7 @@ const seeker=createFrameSeeker(video,{
 });
 async function select(v){
  const token=++loadToken;loadAbort?.abort();loadAbort=new AbortController();const {signal}=loadAbort;
- pausePlayback();seeker.reset();ready=false;plot.clear();image.width=image.height=0;cc.clearRect(0,0,256,256);frame=0;renderedFrame=0;result=null;setControls(false);notice();closeColorPicker();$('loading').hidden=false;$('loading').textContent='Loading video…';selected=v;videos();document.title=`${v.name} · Trajectory`;video.setAttribute('aria-label',v.name);
+ pausePlayback();seeker.reset();ready=false;heatmaps.clear();heatmapValue=null;heatmapFrame=-1;heatRequest++;heatmapErrorShown=false;roiGeometryCurrent=null;mainView.reset();roiView.reset();plot.clear();image.width=image.height=0;cc.clearRect(0,0,256,256);frame=0;renderedFrame=0;result=null;setControls(false);notice();closeColorPicker();$('loading').hidden=false;$('loading').textContent='Loading video…';selected=v;videos();document.title=`${v.name} · Trajectory`;video.setAttribute('aria-label',v.name);
  const sameSource=video.getAttribute('src')===url(v.src);
  try{
   const hasResult=Boolean(history.results[v.id]);
@@ -58,7 +65,7 @@ async function select(v){
    video.addEventListener('loadeddata',loaded);video.addEventListener('error',error);signal.addEventListener('abort',abort,{once:true});video.src=url(v.src);video.load();
   });
   const [data]=await Promise.all([dataPromise,mediaPromise]);if(token!==loadToken)return;
-  result=data;times=Array.from({length:v.frames},(_,i)=>i/v.fps);ready=true;$('frame').max=v.frames-1;setControls(true);
+  result=data;if(hasResult)heatmaps.load(url(`${history.results[v.id]}/heatmaps.zip`),signal);times=Array.from({length:v.frames},(_,i)=>i/v.fps);ready=true;$('frame').max=v.frames-1;setControls(true);
   if(!hasResult)notice('No saved trajectory for this video in this history.');
   seek(Math.max(0,Math.round((data.impact_id??0)-v.fps)));showControls();
  }catch(e){if(token!==loadToken||e.name==='AbortError')return;$('loading').hidden=true;notice(e.message);}
@@ -68,25 +75,48 @@ function present(n){
  if(!ready||video.readyState<2)return;
  renderedFrame=n;if(image.width!==video.videoWidth)image.width=video.videoWidth;if(image.height!==video.videoHeight)image.height=video.videoHeight;image.getContext('2d').drawImage(video,0,0);image.dataset.frame=String(n);$('loading').hidden=true;draw();
 }
+function drawMainPlot(){
+ if(!ready||!image.width)return;
+ $('plot-tooltip').hidden=true;
+ const scale=mainView.scale;if(scale<=0)return;
+ plot.render({result,frame:renderedFrame,width:selected.width,height:selected.height,layers,colors,scale});
+}
+function drawROIDetails(){
+ if(!roiGeometryCurrent||!ready)return;
+ $('plot-tooltip').hidden=true;
+ drawROIPoints($('roi-vectors'),result.detection[renderedFrame],roiGeometryCurrent,roiView.scale,$('plot-tooltip'));
+}
+function paintROICurrent(){
+ if(!ready)return;
+ const row=result.detection[renderedFrame];
+ roiGeometryCurrent=paintROI(crop,image,row,selected.width,selected.height,heatmapFrame===renderedFrame?heatmapValue:null);
+ $('roi-empty').hidden=Boolean(roiGeometryCurrent);$('roi-vectors').hidden=!roiGeometryCurrent;
+ const footer=$('roi-coordinates');footer.replaceChildren();
+ if(roiGeometryCurrent){
+  $('roi-size').textContent=`${Math.round(roiGeometryCurrent.rw)} × ${Math.round(roiGeometryCurrent.rh)}`;
+  for(const item of roiPoints(row)){const line=document.createElement('div'),label=document.createElement('span'),value=document.createElement('strong');line.className='point-coordinate';label.textContent=item.name;label.style.color=detailColors[item.key];value.textContent=item.xy.map(n=>n.toFixed(1)).join(', ');line.append(label,value);footer.append(line);}
+  roiView.apply();
+ }else{$('roi-size').textContent='—';$('roi-vectors').replaceChildren();}
+ crop.dataset.frame=String(renderedFrame);$('roi-card').dataset.renderedFrame=String(renderedFrame);
+}
 function draw(){
  if(!ready||!image.width)return;
- const v=selected,w=$('stage').clientWidth,h=$('stage').clientHeight,scale=Math.min(w/v.width,h/v.height);
- if(scale<=0)return;
- plot.render({result,frame:renderedFrame,width:v.width,height:v.height,layers,colors,scale});
- const row=result.detection[renderedFrame],roi=row?.roi;
- cc.clearRect(0,0,256,256);
- if(roi?.length===4&&roi.every(Number.isFinite)){
-  const [x,y,rw,rh]=roi,[ww,wh]=row.window||[rw,rh],cw=Math.max(1,ww),ch=Math.max(1,wh);
-  cc.fillStyle='#070d16';cc.fillRect(0,0,256,256);
-  const sx=image.width/v.width,sy=image.height/v.height,factor=256/Math.max(cw,ch),dx=(256-cw*factor)/2,dy=(256-ch*factor)/2;
-  const left=x-cw/2,top=y-ch/2,l=Math.max(0,left),t=Math.max(0,top),right=Math.min(v.width,x+cw/2),bottom=Math.min(v.height,y+ch/2);
-  if(right>l&&bottom>t)cc.drawImage(image,l*sx,t*sy,(right-l)*sx,(bottom-t)*sy,dx+(l-left)*factor,dy+(t-top)*factor,(right-l)*factor,(bottom-t)*factor);
-  cc.strokeStyle=colors.roi;cc.lineWidth=2;cc.strokeRect(dx+(cw-rw)/2*factor,dy+(ch-rh)/2*factor,rw*factor,rh*factor);
-  if(valid(row.detect_xy)){const [px,py]=row.detect_xy;cc.strokeStyle='#ffb41e';cc.lineWidth=2.5;cc.beginPath();cc.arc(dx+(px-left)*factor,dy+(py-top)*factor,9,0,Math.PI*2);cc.stroke();}
-  $('roi-empty').hidden=true;$('roi-size').textContent=`${Math.round(rw)} × ${Math.round(rh)}`;$('coordinates').textContent=valid(row.detect_xy)?row.detect_xy.map(n=>n.toFixed(1)).join(', '):'— , —';
- }else{$('roi-empty').hidden=false;$('roi-size').textContent='—';$('coordinates').textContent='— , —';}
- $('crop').dataset.frame=String(renderedFrame);
+ mainView.apply();paintROICurrent();
+ if(heatmapFrame!==renderedFrame&&roiGeometryCurrent){
+  const target=renderedFrame,token=loadToken,request=++heatRequest;
+  heatmaps.frame(target).then(value=>{
+   if(request!==heatRequest||token!==loadToken||target!==renderedFrame)return;
+   heatmapFrame=target;heatmapValue=value;paintROICurrent();
+  }).catch(()=>{if(token===loadToken&&!heatmapErrorShown){heatmapErrorShown=true;notice('The heatmap is unavailable for this video.');}});
+ }
 }
+const roiCard=$('roi-card');let roiClickTimer=null;
+function selectROI(selected){layers.roi=selected;roiCard.classList.toggle('is-selected',selected);roiCard.setAttribute('aria-pressed',String(selected));if(!selected)roiCard.classList.remove('is-enlarged');drawMainPlot();}
+function toggleROISize(){clearTimeout(roiClickTimer);const enlarge=!roiCard.classList.contains('is-enlarged');selectROI(true);roiCard.classList.toggle('is-enlarged',enlarge);roiView.apply();}
+roiCard.addEventListener('click',e=>{if(e.target.closest('button'))return;if(e.detail>1){clearTimeout(roiClickTimer);return;}clearTimeout(roiClickTimer);roiClickTimer=setTimeout(()=>{if(!roiCard.classList.contains('is-enlarged'))selectROI(!layers.roi);},220);});
+roiCard.addEventListener('dblclick',e=>{if(e.target.closest('#roi-stage'))return;e.preventDefault();e.stopPropagation();toggleROISize();});
+roiCard.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();selectROI(!layers.roi);}});
+roiCard.addEventListener('transitionend',e=>{if(e.propertyName==='transform')drawROIDetails();});
 function playbackIcon(key){
  const paths={play:'m8 5 11 7-11 7Z',stop:'M6 6h12v12H6Z'};
  $('play').innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[key]}"/></svg>`;
