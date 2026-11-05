@@ -18,9 +18,13 @@ While the server runs, it watches `data/videos/` and `data/results/`. Adding, re
 
 Choose a result history and video. Newly added history folders appear first; their discovery order is saved in the generated manifest so editing tags/results does not reorder the list. The hamburger button slides the history panel closed and expands the workspace; Escape also closes it. On narrow screens the panel starts closed, and opening it temporarily hides the video rail to preserve space, matching the template. Search or filter the video list by the labels supplied in that history’s `tag.json`. Labels are read-only.
 
-Toggle raw output, fitting curve, extrapolation, and ROI. Paths reveal through the current frame, matching the template. The ROI card shows the saved model window, the ROI rectangle, and the detected point. Geometry stays in original image coordinates even though the playback copies are smaller. Frames without saved ROI geometry show an empty card. No inference button or invalid-tail layer is included.
+Toggle raw output, fitting curve, extrapolation, and ROI with the right-side legend buttons. Each color swatch opens the template-style palette and hex picker. SVG plots use fixed screen-sized dots, current-frame contours, translucent paths, series-wide hover highlighting, coordinate tooltips, click selection, and double-click seeking. Paths reveal through the current frame, matching the template. The ROI card shows the saved model window, the ROI rectangle, and the detected point. Geometry stays in original image coordinates even though the playback copies are smaller. Frames without saved ROI geometry show an empty card. No inference button or invalid-tail layer is included.
 
-Space plays or pauses; left/right step frames; Home/End jump to the ends; I jumps to impact; Shift+up/down changes videos. The frame slider and numeric input also seek directly.
+The playback bar floats inside the video and appears on hover, interaction, or keyboard focus. It uses the template’s play/stop icons and an impact tag positioned on the timeline. No metadata or helper text is displayed below it.
+
+Space plays or stops; left/right or comma/period step frames; Home/End jump to the ends; Shift+left jumps to the nearest earlier impact or frame zero; Shift+right jumps to the last frame; I jumps to impact; Shift+up/down changes videos. The timeline also seeks directly. Playback shortcuts are captured before focused buttons, legend toggles, or sliders can activate, and held Space does not repeatedly toggle playback. Typing fields and open dialogs retain their normal editing keys. Browser/system shortcuts with Ctrl, Command, or Alt are preserved.
+
+Frame requests are queued with one active seek and the latest pending request. Image, plots, and ROI publish together after the decoder presents the matching frame. Rapid scrubbing/held arrow keys coalesce pending work. Playback uses video presentation timestamps; switching videos cancels older loads and seeks. Playback stops when the page loses focus or becomes hidden.
 
 ## Data and video preparation
 
@@ -58,4 +62,4 @@ Startup also builds this directory automatically. The build contains only the st
 
 After the terminal reports “Data ready” and “Static site ready”, the tracked generated files are ready for your usual Git commit and push. Nothing is committed or pushed automatically. If a refresh fails, fix the error before committing.
 
-See `VIDEO_REPORT.md` for automatically updated media sizes. Run `node --test tests/preparation.test.mjs` to check incremental preparation, replacements, deletion cleanup, asset repair, empty libraries, and deployment filtering (requires FFmpeg and ffprobe).
+See `VIDEO_REPORT.md` for automatically updated media sizes. Run `node --test tests/*.test.mjs` to check incremental preparation, replacements, deletion cleanup, asset repair, empty libraries, and deployment filtering (requires FFmpeg and ffprobe).

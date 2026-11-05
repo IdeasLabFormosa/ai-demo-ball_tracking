@@ -12,7 +12,7 @@ export async function build({root=projectRoot}={}){
  for(const asset of assets){if(!asset.startsWith('data/')||path.relative(at('data'),at(asset)).startsWith('..'))throw new Error(`Unsafe catalog asset: ${asset}`);await stat(at(asset));}
  const staging=at('dist-staging');await rm(staging,{recursive:true,force:true});await mkdir(path.join(staging,'data'),{recursive:true});
  try{
-  for(const file of ['index.html','styles.css','app.js'])await cp(at(file),path.join(staging,file));
+  for(const file of ['index.html','styles.css','app.js','viewer'])await cp(at(file),path.join(staging,file),{recursive:true});
   await cp(at('data/manifest.json'),path.join(staging,'data/manifest.json'));
   for(const asset of assets){await mkdir(path.dirname(path.join(staging,asset)),{recursive:true});await cp(at(asset),path.join(staging,asset));}
   for(const h of manifest.histories){const target=path.join(staging,'data/results',h.name);await mkdir(target,{recursive:true});await writeFile(path.join(target,'tag.json'),JSON.stringify(h.tags,null,2)+'\n');}

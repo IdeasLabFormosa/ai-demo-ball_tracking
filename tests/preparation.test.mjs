@@ -16,7 +16,7 @@ test('startup preparation handles changed, removed, missing and new assets witho
  try{
   await mkdir(at('data/videos'),{recursive:true});await mkdir(at('data/results/history/results/a'),{recursive:true});
   await writeFile(at('data/results/history/results/a/output.json'),JSON.stringify({detection:[],fit:[],extrapolation:[],impact_id:null}));
-  for(const file of ['index.html','app.js','styles.css'])await cp(path.join(project,file),at(file));
+  for(const file of ['index.html','app.js','styles.css','viewer'])await cp(path.join(project,file),at(file),{recursive:true});
   clip(at('data/videos/a.mp4'),'black');clip(at('data/videos/b.MOV'),'blue');
   let m=await prepare({root});assert.equal(m.videos.length,2);assert.equal(m.videos[0].frames,4);assert.equal(Object.keys(m.histories[0].results).length,1);
   const first=await stat(at('data/web/a.mp4')),cache=(await json(at('.cache/preparation.json'))).videos['a.mp4'];

@@ -11,7 +11,7 @@ const port=Number(process.argv.find(arg=>arg.startsWith('--port='))?.slice(7)||8
 if(!Number.isInteger(port)||port<1||port>65535)throw new Error('Use --port=<1-65535>');
 await prepare();
 await build();
-const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.mp4':'video/mp4','.jpg':'image/jpeg','.zip':'application/zip'};
+const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json','.mp4':'video/mp4','.jpg':'image/jpeg','.zip':'application/zip'};
 const clients=new Set();
 const server=http.createServer(async(req,res)=>{
  try{
