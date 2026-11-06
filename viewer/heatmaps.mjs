@@ -26,7 +26,7 @@ export function heatmapRGBA(values){
 export function createHeatmaps(){
  let archive=null,cache=new Map();
  return {
-  load(url,signal){cache.clear();archive=fetch(url,{signal}).then(r=>{if(!r.ok)throw new Error('Heatmap archive unavailable');return r.arrayBuffer();}).then(b=>zipEntries(new Uint8Array(b)));archive.catch(()=>{});},
+  load(url,signal){cache.clear();archive=fetch(url,{signal,cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('Heatmap archive unavailable');return r.arrayBuffer();}).then(b=>zipEntries(new Uint8Array(b)));archive.catch(()=>{});},
   async frame(index){if(!archive)return null;const source=archive;const entries=await source;if(source!==archive)return null;const name=`${index}/moving.u8.zlib`;if(!entries.has(name))return null;
    if(!cache.has(name)){const promise=decodeHeatmap(entries.get(name)).catch(error=>{cache.delete(name);throw error;});cache.set(name,promise);while(cache.size>96)cache.delete(cache.keys().next().value);}
    return cache.get(name);

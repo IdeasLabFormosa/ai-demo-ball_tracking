@@ -1,6 +1,6 @@
 # Video size report
 
-30 videos, 2 result histories. Sizes are MiB (1,048,576 bytes).
+30 videos, 1 result histories. Sizes are MiB (1,048,576 bytes).
 
 Original total: **389.80 MiB**. Optimized total: **33.48 MiB** (91.4% smaller).
 

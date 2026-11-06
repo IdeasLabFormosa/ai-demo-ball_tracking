@@ -12,7 +12,8 @@
       "duration": 12.6,
       "originalBytes": 5809383,
       "bytes": 1256872,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "920ab3ac87ed19103159e47f2625247d5e931ac63bb4b54c6aca08ecc65ba260"
     },
     {
       "id": "00",
@@ -26,7 +27,8 @@
       "duration": 9.200316351232395,
       "originalBytes": 1925701,
       "bytes": 505698,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "db9bfafb24312eff2a597eb3e6640475dae7b11ff27878700851619625f6ef0b"
     },
     {
       "id": "01",
@@ -40,7 +42,8 @@
       "duration": 2.3914350501000294,
       "originalBytes": 18099157,
       "bytes": 632061,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "06262a8b6f8ce1a473baddd4f8896ac877d94173a72232fbacad397dc9edecfe"
     },
     {
       "id": "02",
@@ -54,7 +57,8 @@
       "duration": 8.70837728199796,
       "originalBytes": 26928772,
       "bytes": 1790808,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "50c1c3b83db4b8861944a58efc7856f32ec3bd327f908ffb5c6deeae7479d459"
     },
     {
       "id": "03",
@@ -68,7 +72,8 @@
       "duration": 10.500475581241453,
       "originalBytes": 24873849,
       "bytes": 1931810,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "fec078279b0dfb619a5a98046fe83e95a1cb93aad1f4016dd0d50eff99ee15fa"
     },
     {
       "id": "04",
@@ -82,7 +87,8 @@
       "duration": 5.4016401348743175,
       "originalBytes": 114186683,
       "bytes": 2588750,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "37f25e2be224f999fb6e1adcab0751d59d49aa3f2f6cf14927b2095ac24d77bb"
     },
     {
       "id": "04_down_the_line",
@@ -96,7 +102,8 @@
       "duration": 14.666666666666666,
       "originalBytes": 1700954,
       "bytes": 883042,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "3a3cd185fe5e4502d215794897c6d3cc3d2c98c82090fa5438b53fac737306a8"
     },
     {
       "id": "05",
@@ -110,7 +117,8 @@
       "duration": 8.001190461700922,
       "originalBytes": 15955411,
       "bytes": 398812,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "78cb3165c9d621f86307c54c735076c71b54ddff033932808338e810dec96bae"
     },
     {
       "id": "05E08669-6291-4710-A582-D0B8B8BCD12C",
@@ -124,7 +132,8 @@
       "duration": 14.666666666666666,
       "originalBytes": 14996521,
       "bytes": 595495,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "3586abaeed5776f0ad5dc1f4a3d9e3e35053189f42fa2820a8afb2eb11205d3c"
     },
     {
       "id": "06",
@@ -138,7 +147,8 @@
       "duration": 2.1002888424295776,
       "originalBytes": 5306531,
       "bytes": 233436,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "3b4a4628b5e20aa34cde81d8a99be22444b1ed70e8ae59d74533117be87ee0f5"
     },
     {
       "id": "07",
@@ -152,7 +162,8 @@
       "duration": 2.569708571047276,
       "originalBytes": 16236465,
       "bytes": 731344,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "22ac1857ab050dbdb7cf3836bc0cc1e1e06c94de6413f39c26ccee59177c13a7"
     },
     {
       "id": "08",
@@ -166,7 +177,8 @@
       "duration": 4.81074538395424,
       "originalBytes": 2701054,
       "bytes": 369162,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "1d33b0c5beeba48785e6d36f8d111b068aba23b7ab0f7ffa20fa083e3e5b8a86"
     },
     {
       "id": "09",
@@ -180,7 +192,8 @@
       "duration": 4.329546359951457,
       "originalBytes": 4739661,
       "bytes": 747023,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "0851e48e3a1e47ab77df9099c2f088d8200479a9f2ab6acb00154b246b167296"
     },
     {
       "id": "0B61F977-DB44-411E-A9B3-C2595B57E990",
@@ -194,7 +207,8 @@
       "duration": 8,
       "originalBytes": 8842712,
       "bytes": 534901,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "1fe4407703821406cdc93682637e5f18d2ff216343e760ed83d283d523b7467f"
     },
     {
       "id": "10",
@@ -208,7 +222,8 @@
       "duration": 3.043868041094745,
       "originalBytes": 2337454,
       "bytes": 421457,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "e9412de6df28dedb70fb82286390ee2e54fcf3bd6e8d1c2a74866681e4766e69"
     },
     {
       "id": "11",
@@ -222,7 +237,8 @@
       "duration": 3.50893520008514,
       "originalBytes": 3777446,
       "bytes": 704697,
-      "codec": "mpeg4"
+      "codec": "mpeg4",
+      "revision": "41faeb70bd7c9fa05d3266eda0502906af9ad775ce18a91cff7000939adf1549"
     },
     {
       "id": "12",
@@ -236,7 +252,8 @@
       "duration": 9.833333333333334,
       "originalBytes": 4331843,
       "bytes": 789583,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "4b2e668e85171b6225c799115d1ad780dc67082b660a597f17e307ba5e19ecf5"
     },
     {
       "id": "2504610282971708177img_4344",
@@ -250,7 +267,8 @@
       "duration": 12.5,
       "originalBytes": 5690717,
       "bytes": 1739773,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "ec9d4ba8bc6dbce590f830ebfae18f840fdcf9bcbbeee58c961ebd640c3b7daf"
     },
     {
       "id": "3ddemo2",
@@ -264,7 +282,8 @@
       "duration": 12.333333333333334,
       "originalBytes": 5152797,
       "bytes": 1009377,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "0eca6964d32d761b1ae64b688d92c62b801c9771a2b7385e564c3adb939db236"
     },
     {
       "id": "4017096184487857811366c7402-4153-408c-94b5-24046f464cb2",
@@ -278,7 +297,8 @@
       "duration": 14.666666666666666,
       "originalBytes": 5479056,
       "bytes": 985007,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "212c2b4b632ea1c83943e086942b335623a29f908dfa294a473e935df5b808be"
     },
     {
       "id": "48dfe7c5be4377ce613023f7855ed9e3",
@@ -292,7 +312,8 @@
       "duration": 24,
       "originalBytes": 10102429,
       "bytes": 1223676,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "afededd57c0ba80a0d2252e1e0c3bfff4acc9ed9cb6e6aa5b17e539123e361f3"
     },
     {
       "id": "5551390960007468971videofile",
@@ -306,7 +327,8 @@
       "duration": 24,
       "originalBytes": 10710878,
       "bytes": 4936875,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "7217b967bf14d811c53c5972fa3dc92161a5d4ec7d26baa3c4b81d3114268f21"
     },
     {
       "id": "77D8E038-11D0-4829-B145-F9A4ECADDAD4 2",
@@ -320,7 +342,8 @@
       "duration": 5.266666666666667,
       "originalBytes": 6461513,
       "bytes": 583954,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "c9a75e66c844afeca2fb0cac39fb1af9beada9a5fbed779b2701d2ba0913f750"
     },
     {
       "id": "IMG_1096",
@@ -334,7 +357,8 @@
       "duration": 14.666666666666666,
       "originalBytes": 16389220,
       "bytes": 831069,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "3b7442cd751631ee6e9070f627fe46cb09a90ba00e1be34bbfe2e7bddc341743"
     },
     {
       "id": "IMG_4346",
@@ -348,7 +372,8 @@
       "duration": 12.7,
       "originalBytes": 18028126,
       "bytes": 2088518,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "ba6ecec2801a432c92c61a80f82b7766b240052c55538bbdf8ebf322a9babbd8"
     },
     {
       "id": "IMG_4349",
@@ -362,7 +387,8 @@
       "duration": 12.6,
       "originalBytes": 17742458,
       "bytes": 1418106,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "bc0dec2e10c5b009bf6f307aabf2350dd13b25d55df98d6b91b7a1cf25424267"
     },
     {
       "id": "down-the-line",
@@ -376,7 +402,8 @@
       "duration": 29.000000000000004,
       "originalBytes": 10276340,
       "bytes": 1335846,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "1d81158446bc2030d9ebbffa920d4f654331c3b1e3f7fc1c26dab837cc397353"
     },
     {
       "id": "marchell_0",
@@ -390,7 +417,8 @@
       "duration": 28.499999999999996,
       "originalBytes": 9693691,
       "bytes": 1486507,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "deed3708218c1288e57111758583798fdbd4891895ce5e684cd9ccad696fc6b3"
     },
     {
       "id": "marchell_1",
@@ -404,7 +432,8 @@
       "duration": 27.5,
       "originalBytes": 10601392,
       "bytes": 1182463,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "b430c23c51b047c40e1690a77962f53fb1b9c9a768b69b03eaf1c76ae697e418"
     },
     {
       "id": "marchell_2",
@@ -418,78 +447,11 @@
       "duration": 28.666666666666664,
       "originalBytes": 9657808,
       "bytes": 1174402,
-      "codec": "h264"
+      "codec": "h264",
+      "revision": "1c6244da2b68559f0257d002f7307aa2c1d758cf77122ced79f59f9a6fafd476"
     }
   ],
   "histories": [
-    {
-      "name": "v1-2026-11-05",
-      "addedAt": 1793441293811.5554,
-      "tags": {
-        "marchell_2.MP4": "problematic",
-        "marchell_1.MP4": "problematic",
-        "marchell_0.MP4": "problematic",
-        "down-the-line.MP4": "problematic",
-        "IMG_4349.MOV": "good",
-        "IMG_4346.MOV": "problematic",
-        "IMG_1096.MOV": "good",
-        "77D8E038-11D0-4829-B145-F9A4ECADDAD4 2.MOV": "problematic",
-        "5551390960007468971videofile.MP4": "good",
-        "48dfe7c5be4377ce613023f7855ed9e3.MOV": "good",
-        "4017096184487857811366c7402-4153-408c-94b5-24046f464cb2.MOV": "good",
-        "3ddemo2.MP4": "good",
-        "2504610282971708177img_4344.MOV": "good",
-        "12.mov": "good",
-        "11.mov": "good",
-        "10.mov": "good",
-        "0B61F977-DB44-411E-A9B3-C2595B57E990.MOV": "good",
-        "09.mov": "good",
-        "08.mov": "good",
-        "07.MOV": "good",
-        "06.MOV": "good",
-        "05E08669-6291-4710-A582-D0B8B8BCD12C.MOV": "problematic",
-        "05.MOV": "good",
-        "04_down_the_line.mp4": "good",
-        "04.mov": "good",
-        "03.MOV": "good",
-        "02.MOV": "good",
-        "01.MOV": "good",
-        "00.mp4": "good",
-        "-2867598628620296634img_4349.MOV": "good"
-      },
-      "results": {
-        "10": "data/results/v1-2026-11-05/results/10",
-        "11": "data/results/v1-2026-11-05/results/11",
-        "12": "data/results/v1-2026-11-05/results/12",
-        "-2867598628620296634img_4349": "data/results/v1-2026-11-05/results/-2867598628620296634img_4349",
-        "00": "data/results/v1-2026-11-05/results/00",
-        "01": "data/results/v1-2026-11-05/results/01",
-        "02": "data/results/v1-2026-11-05/results/02",
-        "03": "data/results/v1-2026-11-05/results/03",
-        "04": "data/results/v1-2026-11-05/results/04",
-        "04_down_the_line": "data/results/v1-2026-11-05/results/04_down_the_line",
-        "05": "data/results/v1-2026-11-05/results/05",
-        "05E08669-6291-4710-A582-D0B8B8BCD12C": "data/results/v1-2026-11-05/results/05E08669-6291-4710-A582-D0B8B8BCD12C",
-        "06": "data/results/v1-2026-11-05/results/06",
-        "07": "data/results/v1-2026-11-05/results/07",
-        "08": "data/results/v1-2026-11-05/results/08",
-        "09": "data/results/v1-2026-11-05/results/09",
-        "0B61F977-DB44-411E-A9B3-C2595B57E990": "data/results/v1-2026-11-05/results/0B61F977-DB44-411E-A9B3-C2595B57E990",
-        "2504610282971708177img_4344": "data/results/v1-2026-11-05/results/2504610282971708177img_4344",
-        "3ddemo2": "data/results/v1-2026-11-05/results/3ddemo2",
-        "4017096184487857811366c7402-4153-408c-94b5-24046f464cb2": "data/results/v1-2026-11-05/results/4017096184487857811366c7402-4153-408c-94b5-24046f464cb2",
-        "48dfe7c5be4377ce613023f7855ed9e3": "data/results/v1-2026-11-05/results/48dfe7c5be4377ce613023f7855ed9e3",
-        "5551390960007468971videofile": "data/results/v1-2026-11-05/results/5551390960007468971videofile",
-        "77D8E038-11D0-4829-B145-F9A4ECADDAD4 2": "data/results/v1-2026-11-05/results/77D8E038-11D0-4829-B145-F9A4ECADDAD4 2",
-        "IMG_1096": "data/results/v1-2026-11-05/results/IMG_1096",
-        "IMG_4346": "data/results/v1-2026-11-05/results/IMG_4346",
-        "IMG_4349": "data/results/v1-2026-11-05/results/IMG_4349",
-        "down-the-line": "data/results/v1-2026-11-05/results/down-the-line",
-        "marchell_0": "data/results/v1-2026-11-05/results/marchell_0",
-        "marchell_1": "data/results/v1-2026-11-05/results/marchell_1",
-        "marchell_2": "data/results/v1-2026-11-05/results/marchell_2"
-      }
-    },
     {
       "name": "baseline",
       "addedAt": 1793441293811.5554,
@@ -558,5 +520,6 @@
         "marchell_2": "data/results/baseline/results/marchell_2"
       }
     }
-  ]
+  ],
+  "revision": "7f3d8a6841f09dcfe9896d477911846fc8e9a9061d85154a85e7e2034dca69e8"
 }

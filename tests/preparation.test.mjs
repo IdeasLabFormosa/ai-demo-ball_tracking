@@ -20,6 +20,15 @@ test('startup preparation handles changed, removed, missing and new assets witho
   clip(at('data/videos/a.mp4'),'black');clip(at('data/videos/b.MOV'),'blue');
   let m=await prepare({root});assert.equal(m.videos.length,2);assert.equal(m.videos[0].frames,4);assert.equal(Object.keys(m.histories[0].results).length,1);
   const first=await stat(at('data/web/a.mp4')),cache=(await json(at('.cache/preparation.json'))).videos['a.mp4'];
+  const originalRevision=m.revision,videoRevision=m.videos[0].revision;
+  await writeFile(at('data/results/history/results/a/output.json'),JSON.stringify({detection:[],fit:[],extrapolation:[],impact_id:2}));
+  m=await prepare({root});assert.notEqual(m.revision,originalRevision,'editing a result under the same path changes the catalog revision');
+  const resultRevision=m.revision;
+  await writeFile(at('data/results/history/results/a/heatmaps.zip'),'new heatmap content');
+  m=await prepare({root});assert.notEqual(m.revision,resultRevision,'heatmap changes update the catalog too');
+  assert.equal(m.videos[0].revision,videoRevision);assert.equal((await stat(at('data/web/a.mp4'))).mtimeMs,first.mtimeMs,'result edits must not re-encode footage');
+  await rm(at('data/results/history/results/a/heatmaps.zip'));
+
   await prepare({root});assert.equal((await stat(at('data/web/a.mp4'))).mtimeMs,first.mtimeMs,'unchanged media should be reused');
   await writeFile(at('data/results/history/tag.json'),'{"a.mp4":"good"}');
   m=await prepare({root});assert.equal(m.histories[0].tags['a.mp4'],'good');assert.equal((await stat(at('data/web/a.mp4'))).mtimeMs,first.mtimeMs,'tag changes should not re-encode');

@@ -17,8 +17,9 @@ let roiGeometryCurrent=null,heatmapValue=null,heatmapFrame=-1,heatRequest=0,heat
 const mainView=createPanZoom($('stage'),{targets:()=>[image,$('overlay')],dimensions:()=>({width:selected?.width||1,height:selected?.height||1}),onChange:()=>drawMainPlot(),onDoubleClick:()=>mainView.reset()});
 const roiView=createPanZoom($('roi-stage'),{targets:()=>[crop,$('roi-vectors')],dimensions:()=>({width:roiGeometryCurrent?.cw||1,height:roiGeometryCurrent?.ch||1}),onChange:()=>drawROIDetails(),onDoubleClick:()=>toggleROISize(),ignore:'button',ignorePlot:false,anchor:()=>roiGeometryCurrent?{x:roiGeometryCurrent.x-roiGeometryCurrent.left,y:roiGeometryCurrent.y-roiGeometryCurrent.top,fitWidth:roiGeometryCurrent.rw/.9,fitHeight:roiGeometryCurrent.rh/.9}:null});
 const url=p=>p.split('/').map(encodeURIComponent).join('/');
+const mediaURL=(v,p=v.src)=>url(p)+(v.revision?`?v=${v.revision}`:'');
 function notice(message=''){$('notice').textContent=message;$('notice').hidden=!message;}
-async function json(p,signal){const r=await fetch(url(p),{signal});if(!r.ok)throw new Error(`Could not load ${p} (${r.status})`);return r.json();}
+async function json(p,signal){const r=await fetch(url(p),{signal,cache:'no-store'});if(!r.ok)throw new Error(`Could not load ${p} (${r.status})`);return r.json();}
 function badgeFor(v){return history.tags[v.name]||'unlabeled';}
 let videoHoverPreview=null,videoFilter='all';
 function hideVideoPreview(){
@@ -44,7 +45,7 @@ function videos(){
  $('video-count').textContent=`${filtered.length} / ${available.length}`;
  $('videos').replaceChildren(...filtered.map(v=>{
   const b=document.createElement('button');b.className='video-item';b.setAttribute('aria-current',String(selected?.id===v.id));b.title=v.name;
-  const img=document.createElement('img');img.src=url(v.thumbnail);img.alt='';img.loading='lazy';img.width=62;img.height=66;
+  const img=document.createElement('img');img.src=mediaURL(v,v.thumbnail);img.alt='';img.loading='lazy';img.width=62;img.height=66;
   const info=document.createElement('div'),name=document.createElement('strong'),tag=document.createElement('small');
   name.textContent=v.name;tag.className=`tag-dot ${badgeFor(v)}`;tag.textContent=`● ${badgeFor(v)}`;info.append(name,tag);b.append(img,info);
   b.addEventListener('pointerenter',event=>{if(event.pointerType!=='touch')showVideoPreview(img);});
@@ -61,7 +62,7 @@ function histories(){
 }
 async function setHistory(h){
  history=h;histories();const target=manifest.videos.find(v=>v.id===selected?.id)||manifest.videos.find(v=>h.results[v.id])||manifest.videos[0];
- if(target)await select(target);else{pausePlayback();ready=false;result=null;selected=null;video.removeAttribute('src');video.load();plot.clear();image.width=image.height=0;setControls(false);$('loading').hidden=true;$('roi-empty').hidden=false;notice('No videos in data/videos.');videos();}
+ if(target)await select(target);else{++loadToken;loadAbort?.abort();pausePlayback();seeker.reset();heatmaps.clear();heatRequest++;roiGeometryCurrent=null;crop.width=crop.height=0;$('roi-vectors').replaceChildren();ready=false;result=null;selected=null;video.removeAttribute('src');video.load();plot.clear();image.width=image.height=0;setControls(false);$('frame').value=0;$('frame-label').textContent='0 / 0';$('loading').hidden=true;$('roi-empty').hidden=false;notice('No videos in data/videos.');videos();}
 }
 function setControls(enabled){for(const id of ['first','prev','play','next','last','frame'])$(id).disabled=!enabled;updateImpact();}
 function updateImpact(){const impact=result?.impact_id,marker=$('impact');marker.hidden=!ready||!Number.isInteger(impact)||impact<0||impact>=selected.frames;marker.disabled=marker.hidden;if(!marker.hidden){marker.style.left=`${100*impact/Math.max(1,selected.frames-1)}%`;marker.setAttribute('aria-label',`Jump to impact, frame ${impact}`);}}
@@ -74,7 +75,7 @@ const seeker=createFrameSeeker(video,{
 async function select(v){
  const token=++loadToken;loadAbort?.abort();loadAbort=new AbortController();const {signal}=loadAbort;
  pausePlayback();seeker.reset();ready=false;heatmaps.clear();heatmapValue=null;heatmapFrame=-1;heatRequest++;heatmapErrorShown=false;roiGeometryCurrent=null;mainView.reset();roiView.reset();plot.clear();image.width=image.height=0;cc.clearRect(0,0,256,256);frame=0;renderedFrame=0;result=null;setControls(false);notice();closeColorPicker();$('loading').hidden=false;$('loading').textContent='Loading video…';selected=v;videos();video.setAttribute('aria-label',v.name);
- const sameSource=video.getAttribute('src')===url(v.src);
+ const sameSource=video.getAttribute('src')===mediaURL(v);
  try{
   const hasResult=Boolean(history.results[v.id]);
   const dataPromise=hasResult?json(`${history.results[v.id]}/output.json`,signal):Promise.resolve({detection:[],fit:[],extrapolation:[],impact_id:null});
@@ -82,7 +83,7 @@ async function select(v){
    if(sameSource&&video.readyState>=2){resolve();return;}
    const cleanup=()=>{video.removeEventListener('loadeddata',loaded);video.removeEventListener('error',error);signal.removeEventListener('abort',abort);};
    const loaded=()=>{cleanup();resolve();},error=()=>{cleanup();reject(new Error('Video could not be decoded.'));},abort=()=>{cleanup();reject(new DOMException('Cancelled','AbortError'));};
-   video.addEventListener('loadeddata',loaded);video.addEventListener('error',error);signal.addEventListener('abort',abort,{once:true});video.src=url(v.src);video.load();
+   video.addEventListener('loadeddata',loaded);video.addEventListener('error',error);signal.addEventListener('abort',abort,{once:true});video.src=mediaURL(v);video.load();
   });
   const [data]=await Promise.all([dataPromise,mediaPromise]);if(token!==loadToken)return;
   result=data;if(hasResult)heatmaps.load(url(`${history.results[v.id]}/heatmaps.zip`),signal);times=Array.from({length:v.frames},(_,i)=>i/v.fps);ready=true;$('frame').max=v.frames-1;setControls(true);
@@ -249,11 +250,32 @@ sidebarMedia.addEventListener('change',event=>setSidebar(!event.matches));
 setSidebar(!sidebarMedia.matches);
 
 setControls(false);
-try{manifest=await json('data/manifest.json');if(!manifest.histories.length)manifest.histories=[{name:'Videos only',tags:{},results:{}}];await setHistory(manifest.histories[0]);}catch(e){notice(e.message);$('loading').hidden=true;}
-
-// This development-only connection is never opened on GitHub Pages.
+let catalogSignature='',catalogRefresh=null,refreshAgain=false;
+async function refreshCatalog(force=false){
+ if(catalogRefresh){refreshAgain ||= force;return catalogRefresh;}
+ catalogRefresh=(async()=>{
+  try{
+   const next=await json('data/manifest.json'),signature=JSON.stringify(next);
+   if(!force&&signature===catalogSignature)return;
+   const previousVideo=selected?.id,previousFrame=frame;
+   manifest=next;
+   if(!manifest.histories.length)manifest.histories=[{name:'Videos only',tags:{},results:{}}];
+   const nextHistory=manifest.histories.find(h=>h.name===history?.name)||manifest.histories[0];
+   await setHistory(nextHistory);
+   if(ready&&selected?.id===previousVideo)seek(previousFrame);
+   catalogSignature=signature;
+  }catch(e){notice(`Could not refresh data: ${e.message}`);if(!ready)$('loading').hidden=true;}
+ })();
+ try{await catalogRefresh;}finally{catalogRefresh=null;if(refreshAgain){refreshAgain=false;void refreshCatalog(true);}}
+}
+await refreshCatalog();
+// Published pages pick up a newly deployed catalog without requiring a reload.
+const catalogTimer=setInterval(()=>{if(!document.hidden)void refreshCatalog();},15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshCatalog();});
+// Local data edits trigger a refresh even when only result/heatmap contents changed.
 if(['localhost','127.0.0.1','[::1]'].includes(location.hostname)){
  const updates=new EventSource('./__dev/events');
- updates.onmessage=()=>location.reload();
+ updates.onmessage=()=>void refreshCatalog(true);
  window.addEventListener('pagehide',()=>updates.close());
 }
+window.addEventListener('pagehide',()=>clearInterval(catalogTimer));

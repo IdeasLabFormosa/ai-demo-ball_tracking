@@ -1,6 +1,6 @@
 import {readdir,readFile,writeFile,mkdir,stat,rename,rm} from 'node:fs/promises';
 import {createReadStream} from 'node:fs';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
@@ -12,7 +12,7 @@ const probe=p=>JSON.parse(execFileSync('ffprobe',['-v','error','-count_frames','
 async function hash(file){const sum=createHash('sha256');for await(const chunk of createReadStream(file))sum.update(chunk);return sum.digest('hex');}
 async function exists(file){try{await stat(file);return true;}catch(e){if(e.code==='ENOENT')return false;throw e;}}
 async function readJSON(file,fallback){try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}}
-async function writeChanged(file,value){const text=typeof value==='string'?value:JSON.stringify(value,null,2)+'\n';try{if(await readFile(file,'utf8')===text)return;}catch(e){if(e.code!=='ENOENT')throw e;}await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',text);await rename(file+'.tmp',file);}
+async function writeChanged(file,value){const text=typeof value==='string'?value:JSON.stringify(value,null,2)+'\n';try{if(await readFile(file,'utf8')===text)return;}catch(e){if(e.code!=='ENOENT')throw e;}await mkdir(path.dirname(file),{recursive:true});const temporary=`${file}.${process.pid}.${randomUUID()}.tmp`;try{await writeFile(temporary,text);await rename(temporary,file);}finally{await rm(temporary,{force:true});}}
 async function matches(file,expected){return Boolean(expected)&&await exists(file)&&await hash(file)===expected;}
 function report(manifest){
  const original=manifest.videos.reduce((n,v)=>n+v.originalBytes,0),optimized=manifest.videos.reduce((n,v)=>n+v.bytes,0);
@@ -60,12 +60,13 @@ export async function prepare({root=projectRoot,rebuild=false}={}){
    const temporary=at(`data/web/${id}.tmp.jpg`);
    try{execFileSync('ffmpeg',['-v','error','-noautorotate','-i',at(target),'-frames:v','1','-vf','scale=160:-2','-y',temporary]);await rename(temporary,at(thumb));}finally{await rm(temporary,{force:true});}
   }
+  record={...record,revision:sourceHash};
   videos.push(record);nextCache.videos[name]={version:ENCODER_VERSION,sourceHash,videoHash:await hash(at(target)),thumbnailHash:await hash(at(thumb)),video:record};
  }
- const histories=[],discoveredAt=Date.now();
+ const histories=[],discoveredAt=Date.now(),contentRevision=createHash('sha256');
  if(await exists(at('data/results')))for(const folder of (await readdir(at('data/results'),{withFileTypes:true})).filter(e=>e.isDirectory()&&!e.name.startsWith('.')).sort((a,b)=>b.name.localeCompare(a.name))){
   const name=folder.name,base=`data/results/${name}`,tags=await readJSON(at(`${base}/tag.json`),{}),results={};
-  for(const video of videos){const location=`${base}/results/${video.id}`;if(await exists(at(`${location}/output.json`))){const data=await readJSON(at(`${location}/output.json`));if(!Array.isArray(data.detection))throw new Error(`Missing detection array in ${location}/output.json`);results[video.id]=location;}}
+  for(const video of videos){const location=`${base}/results/${video.id}`;if(await exists(at(`${location}/output.json`))){const data=await readJSON(at(`${location}/output.json`));if(!Array.isArray(data.detection))throw new Error(`Missing detection array in ${location}/output.json`);results[video.id]=location;contentRevision.update(location).update(await hash(at(`${location}/output.json`)));const heatmap=at(`${location}/heatmaps.zip`);if(await exists(heatmap))contentRevision.update(await hash(heatmap));}}
   const previous=old.histories.find(h=>h.name===name);
   const folderInfo=await stat(at(base));
   // Persist discovery time so later tag/result edits and Git clones do not
@@ -74,7 +75,7 @@ export async function prepare({root=projectRoot,rebuild=false}={}){
   histories.push({name,addedAt,tags,results});
  }
  histories.sort((a,b)=>b.addedAt-a.addedAt||b.name.localeCompare(a.name));
- const manifest={videos,histories};
+ const manifest={videos,histories,revision:contentRevision.digest('hex')};
  await writeChanged(at('data/manifest.json'),manifest);
  // Delete only derivatives recorded in the old catalog; never delete source
  // footage, result archives, or unrelated files from the user's data directory.
