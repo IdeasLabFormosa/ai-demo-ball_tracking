@@ -122,7 +122,7 @@ body>main{grid-column:2;grid-row:1}
 .timeline-track,.scrubber{display:block;width:100%}.video-controls .frame-heading{display:flex;justify-content:space-between;font-size:10px;margin-bottom:0}
 .video-controls .frame-heading label{visibility:hidden}.video-controls output{margin:0;font-size:10px;color:white}
 .timeline-slider{position:relative;display:block;margin-top:8px}.video-controls input[type=range]{display:block;accent-color:white;height:4px;margin:0;width:100%;cursor:pointer}
-#stage #impact{position:absolute;top:-8px;width:1px;height:25px;padding:0;border:0;border-radius:0;background:#f4cb71;z-index:2;overflow:visible;min-width:0}
+#stage #impact{position:absolute;top:0;width:1px;height:25px;padding:0;border:0;border-radius:0;background:#f4cb71;z-index:2;overflow:visible;min-width:0}
 #impact span{position:absolute;bottom:100%;left:0;padding:2px 5px;border-radius:4px;background:#f4cb71;color:#302819;font-size:9px;line-height:12px;font-weight:600;letter-spacing:0;white-space:nowrap}
 #stage #impact:hover{background:#ffe2a6}#impact:hover span{background:#ffe2a6}
 .playback-controls{display:flex;justify-content:flex-start;gap:0;margin-top:4px}

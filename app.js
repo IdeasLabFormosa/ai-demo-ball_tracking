@@ -65,7 +65,7 @@ async function setHistory(h){
  if(target)await select(target);else{++loadToken;loadAbort?.abort();pausePlayback();seeker.reset();heatmaps.clear();heatRequest++;roiGeometryCurrent=null;crop.width=crop.height=0;$('roi-vectors').replaceChildren();ready=false;result=null;selected=null;video.removeAttribute('src');video.load();plot.clear();image.width=image.height=0;setControls(false);$('frame').value=0;$('frame-label').textContent='0 / 0';$('loading').hidden=true;$('roi-empty').hidden=false;notice('No videos in data/videos.');videos();}
 }
 function setControls(enabled){for(const id of ['first','prev','play','next','last','frame'])$(id).disabled=!enabled;updateImpact();}
-function updateImpact(){const impact=result?.impact_id,marker=$('impact');marker.hidden=!ready||!Number.isInteger(impact)||impact<0||impact>=selected.frames;marker.disabled=marker.hidden;if(!marker.hidden){marker.style.left=`${100*impact/Math.max(1,selected.frames-1)}%`;marker.setAttribute('aria-label',`Jump to impact, frame ${impact}`);}}
+function updateImpact(){const impact=result?.impact_id,marker=$('impact');marker.hidden=!ready||!Number.isInteger(impact)||impact<0||impact>=selected.frames;marker.disabled=marker.hidden;if(!marker.hidden){const ratio=impact/Math.max(1,selected.frames-1);marker.style.left=`calc(${ratio*100}% + ${8-16*ratio}px)`;marker.querySelector('span').style.transform=`translateX(${ratio<.08?'0%':ratio>.92?'-100%':'-50%'})`;marker.setAttribute('aria-label',`Jump to impact, frame ${impact}`);}}
 function requestedFrame(n){frame=n;$('frame').value=n;$('frame-label').textContent=`${n} / ${selected.frames-1}`;}
 const seeker=createFrameSeeker(video,{
  getTimes:()=>times,
